@@ -718,7 +718,6 @@
           opacity: 0;
           transform: translateY(10px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
@@ -730,7 +729,6 @@
           opacity: 0;
           transform: translateY(20px);
         }
-
         to {
           opacity: 1;
           transform: translateY(0);
@@ -748,28 +746,22 @@
         .container {
           padding: 1rem;
         }
-
         .content-card {
           padding: 1.5rem;
         }
-
         .navbar {
           padding: 1rem;
         }
-
         .logo-text {
           font-size: 1rem;
         }
-
         .content-title {
           font-size: 1.25rem;
         }
-
         .tab-btn {
           padding: 0.7rem 1.2rem;
           font-size: 0.85rem;
         }
-
         .btn-primary,
         .btn-secondary {
           padding: 0.8rem 1.5rem;
@@ -777,23 +769,18 @@
           width: 100%;
           justify-content: center;
         }
-
         .form-grid {
           grid-template-columns: 1fr;
         }
-
         .chart-grid {
           grid-template-columns: 1fr;
         }
-
         .chart-card {
           height: 300px;
         }
-
         .chart-container {
           height: 250px !important;
         }
-
         .data-table th,
         .data-table td {
           padding: 0.5rem;
@@ -802,7 +789,6 @@
       }
     </style>
   </head>
-
   <body>
     <nav class="navbar">
       <div class="navbar-logo">
@@ -836,30 +822,30 @@
           <h2 class="content-title">
             <i class="fas fa-chart-pie"></i> 基础画像分析
           </h2>
-          <p class="content-desc">自动加载数据，生成用户画像可视化图表</p>
+          <p class="content-desc">
+            上传CSV数据文件，自动生成用户画像可视化图表
+          </p>
         </div>
 
-        <!-- 文件上传区域 - 保留供手动上传备选 -->
+        <!-- 文件上传区域 -->
         <div class="file-upload" id="fileUploadArea">
           <input type="file" id="fileInput" accept=".csv" />
           <div class="file-upload-icon">
             <i class="fas fa-file-csv"></i>
           </div>
-          <div class="file-upload-text">
-            点击或拖拽CSV文件到此处上传（可选）
-          </div>
+          <div class="file-upload-text">点击或拖拽CSV文件到此处上传</div>
           <div class="file-upload-hint">
-            支持格式: .csv，建议文件大小不超过10MB。系统会自动加载默认数据。
+            支持格式: .csv，建议文件大小不超过10MB
           </div>
         </div>
 
         <!-- 数据加载提示 -->
-        <div class="data-loading" id="dataLoading">
+        <div class="data-loading" id="dataLoading" style="display: none">
           <div class="data-loading-icon">
             <i class="fas fa-database"></i>
           </div>
-          <div class="data-loading-text">正在加载数据...</div>
-          <div class="csv-upload-hint">请稍候，正在处理数据文件</div>
+          <div class="data-loading-text">正在解析数据...</div>
+          <div class="csv-upload-hint">请稍候，正在处理您上传的数据文件</div>
         </div>
 
         <!-- CSV上传状态 -->
@@ -958,7 +944,7 @@
             class="fas fa-info-circle"
             style="color: var(--primary-light); margin-right: 0.5rem"
           ></i>
-          请等待数据加载完成...
+          请先在"基础画像分析"页面上传CSV数据文件
         </div>
 
         <!-- 用户选择 -->
@@ -1314,49 +1300,35 @@
               <option value="">无数据</option>
             </select>
           </div>
+          <div class="form-group">
+            <label class="form-label"
+              >T_school_night_resident (当前是否夜间校园常驻)</label
+            >
+            <select class="form-input" id="T_school_night_resident" disabled>
+              <option value="">无数据</option>
+            </select>
+          </div>
         </div>
 
-        <!-- 分析按钮 -->
-        <div class="btn-group" id="analysisButtonGroup" style="display: none">
-          <button class="btn-primary" id="analyzeUser">
-            <i class="fas fa-search"></i> 分析用户特征
+        <!-- 按钮组 -->
+        <div class="btn-group" id="predictionButtons" style="display: none">
+          <button class="btn-primary" id="predictBtn" disabled>
+            <i class="fas fa-search"></i> 识别客群
+          </button>
+          <button class="btn-secondary" id="resetBtn" disabled>
+            <i class="fas fa-eraser"></i> 重置表单
           </button>
         </div>
 
         <!-- 加载状态 -->
-        <div class="loading" id="predictionLoading">
+        <div class="loading" id="predictLoading">
           <div class="loading-spinner"></div>
-          正在分析用户特征并识别客群...
+          正在识别客群...
         </div>
 
         <!-- 预测结果 -->
         <div class="prediction-result" id="predictionResult">
-          <div class="prediction-header">
-            <h3 class="prediction-title">
-              <i class="fas fa-user-check"></i> 客群识别结果
-            </h3>
-            <span class="prediction-badge" id="predictionConfidence"
-              >匹配度: --%</span
-            >
-          </div>
-          <div class="result-content">
-            <div class="result-metric">
-              <div class="metric-label">识别客群</div>
-              <div class="metric-value highlight" id="predictedGroup">--</div>
-            </div>
-
-            <div class="result-metric">
-              <div class="metric-label">用户特征总结</div>
-              <div class="metric-value" id="userFeatureSummary">--</div>
-            </div>
-
-            <div class="result-metric">
-              <div class="metric-label">运营建议</div>
-              <ul class="recommendation-list" id="recommendations">
-                <li>--</li>
-              </ul>
-            </div>
-          </div>
+          <!-- 动态生成结果 -->
         </div>
       </div>
 
@@ -1366,7 +1338,9 @@
           <h2 class="content-title">
             <i class="fas fa-chart-line"></i> 模型评估报告
           </h2>
-          <p class="content-desc">客群识别模型的性能评估指标与可视化分析</p>
+          <p class="content-desc">
+            基于上传数据的用户画像模型评估指标与可视化分析
+          </p>
         </div>
 
         <!-- 提示信息：请先上传数据 -->
@@ -1381,77 +1355,9 @@
           请先在"基础画像分析"页面上传CSV数据文件
         </div>
 
-        <!-- 生成评估报告按钮 -->
-        <div
-          class="btn-group"
-          id="generateEvalButtonGroup"
-          style="display: none"
-        >
-          <button class="btn-primary" id="generateEvalReport">
-            <i class="fas fa-file-alt"></i> 生成评估报告
-          </button>
-        </div>
-
-        <!-- 加载状态 -->
-        <div class="loading" id="evalLoading">
-          <div class="loading-spinner"></div>
-          正在生成模型评估报告...
-        </div>
-
-        <!-- 评估报告内容 -->
-        <div id="evalReportContent" style="display: none">
-          <div class="eval-report-card">
-            <div class="eval-header">
-              <h3 class="eval-title">
-                <i class="fas fa-chart-pie"></i> 模型性能指标
-              </h3>
-            </div>
-            <div class="eval-metrics">
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">准确率 (Accuracy)</div>
-                <div class="eval-metric-value" id="accuracy">--</div>
-              </div>
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">精确率 (Precision)</div>
-                <div class="eval-metric-value" id="precision">--</div>
-              </div>
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">召回率 (Recall)</div>
-                <div class="eval-metric-value" id="recall">--</div>
-              </div>
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">F1分数</div>
-                <div class="eval-metric-value" id="f1Score">--</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="chart-grid" style="margin-top: 2rem">
-            <div class="chart-card">
-              <div class="chart-header">
-                <h3 class="chart-title">
-                  <i class="fas fa-chart-bar"></i> 各类别精确率对比
-                </h3>
-              </div>
-              <div class="chart-container" id="precisionChart"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-header">
-                <h3 class="chart-title">
-                  <i class="fas fa-chart-bar"></i> 各类别召回率对比
-                </h3>
-              </div>
-              <div class="chart-container" id="recallChart"></div>
-            </div>
-            <div class="chart-card" style="grid-column: 1 / -1">
-              <div class="chart-header">
-                <h3 class="chart-title">
-                  <i class="fas fa-chart-pie"></i> 混淆矩阵
-                </h3>
-              </div>
-              <div class="chart-container" id="confusionMatrix"></div>
-            </div>
-          </div>
+        <!-- 模型评估内容将在上传数据后显示 -->
+        <div id="evalContent" style="display: none">
+          <!-- 评估内容将动态生成 -->
         </div>
       </div>
 
@@ -1460,7 +1366,7 @@
         <div class="content-header">
           <h2 class="content-title"><i class="fas fa-robot"></i> AI智能分析</h2>
           <p class="content-desc">
-            通过AI对Z世代用户数据进行深度分析，获取洞察与建议
+            基于上传数据进行智能分析，生成Z世代用户画像洞察报告
           </p>
         </div>
 
@@ -1476,43 +1382,36 @@
           请先在"基础画像分析"页面上传CSV数据文件
         </div>
 
-        <!-- AI分析输入区域 -->
-        <div id="aiAnalysisArea" style="display: none">
+        <!-- AI分析内容将在上传数据后显示 -->
+        <div id="aiContent" style="display: none">
           <div class="form-group">
-            <label class="form-label"
-              >请输入您想分析的问题（例如：Z世代用户的主要消费特征是什么？）</label
-            >
+            <label class="form-label">分析需求（可选）</label>
             <textarea
               class="ai-textarea"
-              id="aiQuestion"
-              placeholder="请输入您的问题..."
+              id="analysisPrompt"
+              placeholder="请输入您想要分析的具体问题，例如：Z世代用户的消费习惯有什么特点？哪些APP最受欢迎？"
             ></textarea>
           </div>
 
           <div class="btn-group">
-            <button class="btn-primary" id="submitAiQuestion">
-              <i class="fas fa-paper-plane"></i> 提交分析请求
-            </button>
-            <button class="btn-secondary" id="clearAiQuestion">
-              <i class="fas fa-eraser"></i> 清空
+            <button class="btn-primary" id="generateAnalysis">
+              <i class="fas fa-magic"></i> 生成分析报告
             </button>
           </div>
 
-          <!-- 加载状态 -->
           <div class="loading" id="aiLoading">
             <div class="loading-spinner"></div>
-            AI正在分析数据并生成回答...
+            正在生成分析报告...
           </div>
 
-          <!-- AI分析结果 -->
-          <div class="result-card" id="aiResultCard">
+          <div class="result-card" id="analysisResult">
             <div class="result-header">
               <div class="result-icon">
-                <i class="fas fa-lightbulb"></i>
+                <i class="fas fa-chart-line"></i>
               </div>
-              <h3 class="result-title">AI分析结果</h3>
+              <h3 class="prediction-title">AI分析报告</h3>
             </div>
-            <div class="ai-result-content" id="aiResultContent">
+            <div class="ai-result-content" id="analysisContent">
               <!-- AI分析结果将在这里显示 -->
             </div>
           </div>
@@ -1521,33 +1420,39 @@
     </div>
 
     <script>
-      // 全局变量存储解析后的CSV数据
+      // 全局变量存储CSV数据
       let csvData = null;
       let csvHeaders = [];
 
-      // DOM元素
-      const tabBtns = document.querySelectorAll(".tab-btn");
-      const contentCards = document.querySelectorAll(".content-card");
-      const fileInput = document.getElementById("fileInput");
-      const fileUploadArea = document.getElementById("fileUploadArea");
-      const dataLoading = document.getElementById("dataLoading");
-      const csvStatus = document.getElementById("csvStatus");
-      const csvStatusText = document.getElementById("csvStatusText");
-      const dataPreview = document.getElementById("dataPreview");
-      const dataTable = document.getElementById("dataTable");
-      const refreshPortrait = document.getElementById("refreshPortrait");
-      const portraitLoading = document.getElementById("portraitLoading");
-      const chartGrid = document.getElementById("chartGrid");
-      const uploadPrompt = document.getElementById("uploadPrompt");
-      const userSelectWrapper = document.getElementById("userSelectWrapper");
-      const userIdSelect = document.getElementById("userIdSelect");
-
-      // 页面加载完成后自动加载CSV数据
+      // 页面加载完成后初始化
       document.addEventListener("DOMContentLoaded", function () {
-        // 自动加载CSV数据
-        loadCsvData();
+        // 初始化标签页切换
+        initTabs();
 
-        // 标签切换功能
+        // 初始化文件上传功能
+        initFileUpload();
+
+        // 初始化刷新按钮
+        initRefreshButton();
+
+        // 初始化用户选择和表单功能
+        initUserSelection();
+
+        // 初始化预测按钮
+        initPredictButton();
+
+        // 初始化重置按钮
+        initResetButton();
+
+        // 初始化AI分析按钮
+        initAiAnalysisButton();
+      });
+
+      // 初始化标签页切换
+      function initTabs() {
+        const tabBtns = document.querySelectorAll(".tab-btn");
+        const contentCards = document.querySelectorAll(".content-card");
+
         tabBtns.forEach((btn) => {
           btn.addEventListener("click", () => {
             const tabId = btn.getAttribute("data-tab");
@@ -1557,271 +1462,188 @@
             btn.classList.add("active");
 
             // 更新内容卡片状态
-            contentCards.forEach((card) => {
-              card.classList.remove("active");
-              if (card.id === tabId) {
-                card.classList.add("active");
-              }
-            });
+            contentCards.forEach((card) => card.classList.remove("active"));
+            document.getElementById(tabId).classList.add("active");
 
-            // 如果切换到细分客群识别标签且数据已加载，更新用户选择
-            if (tabId === "predict" && csvData) {
-              populateUserSelect();
-            }
-
-            // 如果切换到模型评估标签且数据已加载，显示生成报告按钮
-            if (tabId === "eval" && csvData) {
-              document.getElementById("evalUploadPrompt").style.display =
-                "none";
-              document.getElementById("generateEvalButtonGroup").style.display =
-                "flex";
-            }
-
-            // 如果切换到AI分析标签且数据已加载，显示分析区域
-            if (tabId === "ai" && csvData) {
-              document.getElementById("aiUploadPrompt").style.display = "none";
-              document.getElementById("aiAnalysisArea").style.display = "block";
+            // 如果切换到其他标签页且已有数据，显示相应内容
+            if (csvData && tabId === "predict") {
+              showPredictContent();
+            } else if (csvData && tabId === "eval") {
+              showEvalContent();
+            } else if (csvData && tabId === "ai") {
+              showAiContent();
             }
           });
         });
+      }
 
-        // 文件上传区域点击事件
+      // 初始化文件上传功能
+      function initFileUpload() {
+        const fileInput = document.getElementById("fileInput");
+        const fileUploadArea = document.getElementById("fileUploadArea");
+        const dataLoading = document.getElementById("dataLoading");
+        const csvStatus = document.getElementById("csvStatus");
+        const csvStatusText = document.getElementById("csvStatusText");
+
+        // 点击上传区域触发文件选择
         fileUploadArea.addEventListener("click", () => {
           fileInput.click();
         });
 
-        // 文件上传事件
+        // 拖拽功能
+        fileUploadArea.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          fileUploadArea.style.borderColor = javascript(--primary - light);
+          fileUploadArea.style.background = "rgba(30, 41, 59, 0.8)";
+        });
+
+        fileUploadArea.addEventListener("dragleave", () => {
+          fileUploadArea.style.borderColor = "rgba(99, 102, 241, 0.3)";
+          fileUploadArea.style.background = "rgba(30, 41, 59, 0.6)";
+        });
+
+        fileUploadArea.addEventListener("drop", (e) => {
+          e.preventDefault();
+          fileUploadArea.style.borderColor = "rgba(99, 102, 241, 0.3)";
+          fileUploadArea.style.background = "rgba(30, 41, 59, 0.6)";
+
+          if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            handleFileUpload();
+          }
+        });
+
+        // 文件选择后处理
         fileInput.addEventListener("change", handleFileUpload);
 
-        // 刷新画像按钮事件
-        refreshPortrait.addEventListener("click", refreshPortraitAnalysis);
+        // 处理文件上传
+        function handleFileUpload() {
+          const file = fileInput.files[0];
+          if (!file) return;
 
-        // 用户选择变化事件
-        userIdSelect.addEventListener("change", handleUserSelection);
+          // 验证文件类型
+          if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+            alert("请上传CSV格式的文件");
+            return;
+          }
 
-        // 分析用户按钮事件
-        document
-          .getElementById("analyzeUser")
-          .addEventListener("click", analyzeUser);
+          // 显示加载状态
+          dataLoading.style.display = "block";
+          fileUploadArea.style.display = "none";
+          csvStatus.classList.remove("active");
 
-        // 生成评估报告按钮事件
-        document
-          .getElementById("generateEvalReport")
-          .addEventListener("click", generateEvalReport);
+          // 使用PapaParse解析CSV
+          Papa.parse(file, {
+            header: true,
+            dynamicTyping: true,
+            complete: function (results) {
+              // 存储解析后的数据
+              csvData = results.data;
+              csvHeaders = results.meta.fields;
 
-        // AI分析相关事件
-        document
-          .getElementById("submitAiQuestion")
-          .addEventListener("click", submitAiQuestion);
-        document
-          .getElementById("clearAiQuestion")
-          .addEventListener("click", clearAiQuestion);
-      });
-
-      // 加载CSV数据
-      function loadCsvData() {
-        // 显示加载状态
-        dataLoading.style.display = "block";
-        csvStatus.classList.remove("active");
-        dataPreview.classList.remove("active");
-        chartGrid.style.display = "none";
-        refreshPortrait.style.display = "none";
-
-        // 这里需要将CSV文件上传到GitHub仓库，并修改为正确的路径
-        // 例如，如果文件放在仓库的data目录下，路径可能是：
-        const csvUrl = "data/wutong.csv"; // 修改为实际的CSV文件URL
-
-        // 使用PapaParse从URL加载CSV
-        Papa.parse(csvUrl, {
-          download: true,
-          header: true,
-          complete: function (results) {
-            if (results.errors && results.errors.length > 0) {
-              console.error("CSV解析错误:", results.errors);
+              // 隐藏加载状态
               dataLoading.style.display = "none";
-              csvStatusText.innerHTML = `数据加载失败: ${results.errors[0].message}`;
-              csvStatus.style.background = "rgba(239, 68, 68, 0.1)";
-              csvStatus.style.color = "#ef4444";
+
+              // 显示上传状态
+              csvStatusText.textContent = `已成功加载数据，共 ${csvData.length} 条记录`;
               csvStatus.classList.add("active");
-              return;
-            }
 
-            // 存储解析后的数据
-            csvData = results.data;
-            csvHeaders = results.meta.fields;
+              // 显示数据预览
+              displayDataPreview();
 
-            // 更新状态和预览
-            updateDataStatusAndPreview();
+              // 显示刷新按钮
+              document.getElementById("refreshPortrait").style.display =
+                "block";
 
-            // 生成画像分析
-            generatePortraitAnalysis();
+              // 生成图表
+              generateCharts();
 
-            // 更新其他标签页状态
-            updateOtherTabs();
-          },
-          error: function (error) {
-            console.error("加载CSV时出错:", error);
-            dataLoading.style.display = "none";
-            csvStatusText.innerHTML = `加载数据失败: ${error.message}`;
-            csvStatus.style.background = "rgba(239, 68, 68, 0.1)";
-            csvStatus.style.color = "#ef4444";
-            csvStatus.classList.add("active");
-          },
-        });
-      }
-
-      // 处理文件上传
-      function handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // 检查文件类型
-        if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-          alert("请上传CSV格式的文件");
-          return;
+              // 更新其他标签页状态
+              updateOtherTabs();
+            },
+            error: function (error) {
+              dataLoading.style.display = "none";
+              alert(`解析CSV文件时出错: ${error.message}`);
+              fileUploadArea.style.display = "block";
+            },
+          });
         }
-
-        // 显示加载状态
-        dataLoading.style.display = "block";
-        csvStatus.classList.remove("active");
-        dataPreview.classList.remove("active");
-        chartGrid.style.display = "none";
-        refreshPortrait.style.display = "none";
-
-        // 解析CSV文件
-        Papa.parse(file, {
-          header: true,
-          complete: function (results) {
-            if (results.errors && results.errors.length > 0) {
-              console.error("CSV解析错误:", results.errors);
-              dataLoading.style.display = "none";
-              csvStatusText.innerHTML = `数据解析失败: ${results.errors[0].message}`;
-              csvStatus.style.background = "rgba(239, 68, 68, 0.1)";
-              csvStatus.style.color = "#ef4444";
-              csvStatus.classList.add("active");
-              return;
-            }
-
-            // 存储解析后的数据
-            csvData = results.data;
-            csvHeaders = results.meta.fields;
-
-            // 更新状态和预览
-            updateDataStatusAndPreview();
-
-            // 生成画像分析
-            generatePortraitAnalysis();
-
-            // 更新其他标签页状态
-            updateOtherTabs();
-
-            // 重置文件输入，允许重复上传同一文件
-            fileInput.value = "";
-          },
-        });
       }
 
-      // 更新数据状态和预览
-      function updateDataStatusAndPreview() {
-        // 隐藏加载状态
-        dataLoading.style.display = "none";
-
-        // 更新状态信息
-        csvStatusText.innerHTML = `已成功加载数据，共 ${csvData.length} 条记录`;
-        csvStatus.style.background = "rgba(16, 185, 129, 0.1)";
-        csvStatus.style.color = "#10b981";
-        csvStatus.classList.add("active");
-
-        // 显示数据预览
-        dataPreview.classList.add("active");
-        generateDataPreview();
-
-        // 显示刷新按钮
-        refreshPortrait.style.display = "block";
-      }
-
-      // 生成数据预览表格
-      function generateDataPreview() {
-        if (
-          !csvData ||
-          csvData.length === 0 ||
-          !csvHeaders ||
-          csvHeaders.length === 0
-        )
-          return;
+      // 显示数据预览
+      function displayDataPreview() {
+        const dataTable = document.getElementById("dataTable");
+        const dataPreview = document.getElementById("dataPreview");
 
         // 清空表格
         dataTable.innerHTML = "";
+
+        // 限制显示的列数，避免表格过宽
+        const displayHeaders = csvHeaders.slice(0, 8); // 只显示前8列
 
         // 创建表头
         const thead = document.createElement("thead");
         const headerRow = document.createElement("tr");
 
-        // 只显示前5个列，避免表格过宽
-        const displayHeaders = csvHeaders.slice(0, 5);
         displayHeaders.forEach((header) => {
           const th = document.createElement("th");
           th.textContent = header;
           headerRow.appendChild(th);
         });
 
-        // 如果有更多列，添加一个省略列
-        if (csvHeaders.length > 5) {
-          const th = document.createElement("th");
-          th.textContent = "...";
-          headerRow.appendChild(th);
-        }
-
         thead.appendChild(headerRow);
         dataTable.appendChild(thead);
 
-        // 创建表格内容
+        // 创建表格内容（最多显示10行）
         const tbody = document.createElement("tbody");
-        const displayRows = csvData.slice(0, 10); // 只显示前10行
+        const displayRows = Math.min(10, csvData.length);
 
-        displayRows.forEach((row) => {
-          const tr = document.createElement("tr");
+        for (let i = 0; i < displayRows; i++) {
+          const row = document.createElement("tr");
+          const dataRow = csvData[i];
 
-          // 添加前5列数据
           displayHeaders.forEach((header) => {
             const td = document.createElement("td");
-            td.textContent = row[header] !== undefined ? row[header] : "";
-            tr.appendChild(td);
+            td.textContent =
+              dataRow[header] !== undefined ? dataRow[header] : "";
+            row.appendChild(td);
           });
 
-          // 如果有更多列，添加一个省略单元格
-          if (csvHeaders.length > 5) {
-            const td = document.createElement("td");
-            td.textContent = "...";
-            tr.appendChild(td);
-          }
-
-          tbody.appendChild(tr);
-        });
+          tbody.appendChild(row);
+        }
 
         dataTable.appendChild(tbody);
+
+        // 显示数据预览
+        dataPreview.classList.add("active");
       }
 
-      // 刷新画像分析
-      function refreshPortraitAnalysis() {
-        if (!csvData || csvData.length === 0) return;
+      // 初始化刷新按钮
+      function initRefreshButton() {
+        const refreshBtn = document.getElementById("refreshPortrait");
 
-        // 显示加载状态
-        portraitLoading.classList.add("active");
-        chartGrid.style.display = "none";
+        refreshBtn.addEventListener("click", function () {
+          const chartGrid = document.getElementById("chartGrid");
+          const portraitLoading = document.getElementById("portraitLoading");
 
-        // 延迟执行，模拟加载过程
-        setTimeout(() => {
-          generatePortraitAnalysis();
-          portraitLoading.classList.remove("active");
-        }, 800);
+          // 隐藏图表，显示加载状态
+          chartGrid.style.display = "none";
+          portraitLoading.classList.add("active");
+
+          // 延迟一段时间后重新生成图表，模拟加载过程
+          setTimeout(() => {
+            generateCharts();
+            portraitLoading.classList.remove("active");
+          }, 800);
+        });
       }
 
-      // 生成画像分析图表
-      function generatePortraitAnalysis() {
+      // 生成图表
+      function generateCharts() {
         if (!csvData || csvData.length === 0) return;
 
         // 显示图表区域
+        const chartGrid = document.getElementById("chartGrid");
         chartGrid.style.display = "grid";
 
         // 生成年龄分布图表
@@ -1845,23 +1667,23 @@
         const ageGroups = {
           "18岁以下": 0,
           "18-22岁": 0,
-          "23-25岁": 0,
-          "26-30岁": 0,
+          "23-26岁": 0,
+          "27-30岁": 0,
           "30岁以上": 0,
         };
 
-        csvData.forEach((row) => {
-          const age = parseInt(row.AGE || 0);
-          if (isNaN(age)) return;
+        csvData.forEach((user) => {
+          const age = user.AGE;
+          if (age === undefined) return;
 
           if (age < 18) {
             ageGroups["18岁以下"]++;
           } else if (age >= 18 && age <= 22) {
             ageGroups["18-22岁"]++;
-          } else if (age >= 23 && age <= 25) {
-            ageGroups["23-25岁"]++;
-          } else if (age >= 26 && age <= 30) {
-            ageGroups["26-30岁"]++;
+          } else if (age >= 23 && age <= 26) {
+            ageGroups["23-26岁"]++;
+          } else if (age >= 27 && age <= 30) {
+            ageGroups["27-30岁"]++;
           } else {
             ageGroups["30岁以上"]++;
           }
@@ -1897,7 +1719,7 @@
               emphasis: {
                 label: {
                   show: true,
-                  fontSize: "16",
+                  fontSize: 16,
                   fontWeight: "bold",
                   color: "#fff",
                 },
@@ -1929,14 +1751,16 @@
         const cityChart = echarts.init(document.getElementById("cityChart"));
 
         // 处理城市数据，只取前10个城市
-        const cityData = {};
-        csvData.forEach((row) => {
-          const city = row.CITY || "未知城市";
-          cityData[city] = (cityData[city] || 0) + 1;
+        const cityCounts = {};
+        csvData.forEach((user) => {
+          const city = user.CITY;
+          if (city && city !== "未知") {
+            cityCounts[city] = (cityCounts[city] || 0) + 1;
+          }
         });
 
         // 排序并取前10
-        const sortedCities = Object.entries(cityData)
+        const topCities = Object.entries(cityCounts)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 10);
 
@@ -1967,7 +1791,7 @@
           },
           yAxis: {
             type: "category",
-            data: sortedCities.map((item) => item[0]),
+            data: topCities.map((item) => item[0]),
             axisLine: {
               lineStyle: {
                 color: "#94a3b8",
@@ -1981,13 +1805,21 @@
             {
               name: "用户数量",
               type: "bar",
-              data: sortedCities.map((item, index) => ({
-                value: item[1],
+              data: topCities.map((item) => item[1]),
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                  { offset: 0, color: "#6366f1" },
+                  { offset: 1, color: "#818cf8" },
+                ]),
+              },
+              emphasis: {
                 itemStyle: {
-                  color: getColorByIndex(index),
+                  color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                    { offset: 0, color: "#818cf8" },
+                    { offset: 1, color: "#6366f1" },
+                  ]),
                 },
-              })),
-              barWidth: "60%",
+              },
             },
           ],
         };
@@ -2008,103 +1840,70 @@
 
         // 处理消费数据
         const arpuData = csvData
-          .map((row) => parseFloat(row.DIS_ARPU || 0))
-          .filter((value) => !isNaN(value) && value > 0);
-
-        // 计算平均值和分布
-        const avgArpu =
-          arpuData.length > 0
-            ? (
-                arpuData.reduce((sum, val) => sum + val, 0) / arpuData.length
-              ).toFixed(2)
-            : 0;
-
-        const arpuRanges = {
-          "0-50元": 0,
-          "51-100元": 0,
-          "101-200元": 0,
-          "201-300元": 0,
-          "300元以上": 0,
-        };
-
-        arpuData.forEach((value) => {
-          if (value <= 50) {
-            arpuRanges["0-50元"]++;
-          } else if (value <= 100) {
-            arpuRanges["51-100元"]++;
-          } else if (value <= 200) {
-            arpuRanges["101-200元"]++;
-          } else if (value <= 300) {
-            arpuRanges["201-300元"]++;
-          } else {
-            arpuRanges["300元以上"]++;
-          }
-        });
+          .filter(
+            (user) =>
+              user.N3M_AVG_DIS_ARPU !== undefined && user.N3M_AVG_DIS_ARPU > 0
+          )
+          .map((user) => user.N3M_AVG_DIS_ARPU)
+          .slice(0, 20); // 取前20条数据
 
         // 配置图表
         const option = {
           tooltip: {
-            trigger: "item",
+            trigger: "axis",
+            axisPointer: {
+              type: "shadow",
+            },
+            formatter: "{b}: {c} 元",
           },
-          legend: {
-            top: "5%",
-            left: "center",
-            textStyle: {
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "3%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "category",
+            data: arpuData.map((_, index) => `用户${index + 1}`),
+            axisLine: {
+              lineStyle: {
+                color: "#94a3b8",
+              },
+            },
+            axisLabel: {
               color: "#e2e8f0",
+              rotate: 45,
+            },
+          },
+          yAxis: {
+            type: "value",
+            name: "月均消费 (元)",
+            nameTextStyle: {
+              color: "#e2e8f0",
+            },
+            axisLine: {
+              lineStyle: {
+                color: "#94a3b8",
+              },
+            },
+            axisLabel: {
+              color: "#e2e8f0",
+              formatter: "{value} 元",
             },
           },
           series: [
             {
-              name: "月均消费分布",
-              type: "pie",
-              radius: ["40%", "70%"],
-              avoidLabelOverlap: false,
+              name: "月均ARPU值",
+              type: "bar",
+              data: arpuData,
               itemStyle: {
-                borderRadius: 10,
-                borderColor: "#1e293b",
-                borderWidth: 2,
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: "#ec4899" },
+                  { offset: 1, color: "#f472b6" },
+                ]),
               },
-              label: {
-                show: false,
-                position: "center",
-              },
-              emphasis: {
-                label: {
-                  show: true,
-                  fontSize: "16",
-                  fontWeight: "bold",
-                  color: "#fff",
-                },
-              },
-              labelLine: {
-                show: false,
-              },
-              data: Object.entries(arpuRanges).map(([name, value], index) => ({
-                name: `${name} (${((value / arpuData.length) * 100).toFixed(
-                  1
-                )}%)`,
-                value,
-                itemStyle: {
-                  color: getColorByIndex(index),
-                },
-              })),
             },
           ],
-          graphic: {
-            elements: [
-              {
-                type: "text",
-                left: "center",
-                top: "50%",
-                style: {
-                  text: `平均: ${avgArpu}元`,
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  fill: "#e2e8f0",
-                },
-              },
-            ],
-          },
         };
 
         consumeChart.setOption(option);
@@ -2131,34 +1930,28 @@
           { name: "学习", field: "N3M_AVG_LEARN_APP_USE_DAYS" },
           { name: "阅读", field: "N3M_AVG_READ_APP_USE_DAYS" },
           { name: "办公", field: "N3M_AVG_OFFICE_APP_USE_DAYS" },
-          { name: "出行", field: "N3M_AVG_TRIP_APP_USE_DAYS" },
-          { name: "金融", field: "N3M_AVG_FINANC_APP_USE_DAYS" },
         ];
 
         // 计算每个类别的平均使用天数
-        const appData = appCategories
-          .map((category, index) => {
-            let total = 0;
-            let count = 0;
+        const appAverages = appCategories.map((category) => {
+          let total = 0;
+          let count = 0;
 
-            csvData.forEach((row) => {
-              const value = parseFloat(row[category.field] || 0);
-              if (!isNaN(value) && value > 0) {
-                total += value;
-                count++;
-              }
-            });
+          csvData.forEach((user) => {
+            if (
+              user[category.field] !== undefined &&
+              !isNaN(user[category.field])
+            ) {
+              total += user[category.field];
+              count++;
+            }
+          });
 
-            const avg = count > 0 ? (total / count).toFixed(1) : 0;
-            return {
-              name: category.name,
-              value: parseFloat(avg),
-              itemStyle: {
-                color: getColorByIndex(index),
-              },
-            };
-          })
-          .sort((a, b) => b.value - a.value);
+          return {
+            name: category.name,
+            average: count > 0 ? (total / count).toFixed(1) : 0,
+          };
+        });
 
         // 配置图表
         const option = {
@@ -2169,6 +1962,12 @@
             },
             formatter: "{b}: {c} 天/月",
           },
+          legend: {
+            data: ["平均使用天数"],
+            textStyle: {
+              color: "#e2e8f0",
+            },
+          },
           grid: {
             left: "3%",
             right: "4%",
@@ -2177,7 +1976,7 @@
           },
           xAxis: {
             type: "category",
-            data: appData.map((item) => item.name),
+            data: appAverages.map((item) => item.name),
             axisLine: {
               lineStyle: {
                 color: "#94a3b8",
@@ -2201,18 +2000,18 @@
             axisLabel: {
               color: "#e2e8f0",
             },
-            splitLine: {
-              lineStyle: {
-                color: "rgba(148, 163, 184, 0.1)",
-              },
-            },
           },
           series: [
             {
-              name: "使用天数",
+              name: "平均使用天数",
               type: "bar",
-              data: appData,
               barWidth: "60%",
+              data: appAverages.map((item) => parseFloat(item.average)),
+              itemStyle: {
+                color: function (params) {
+                  return getColorByIndex(params.dataIndex);
+                },
+              },
             },
           ],
         };
@@ -2227,12 +2026,33 @@
 
       // 更新其他标签页状态
       function updateOtherTabs() {
-        // 更新细分客群识别标签
+        // 如果当前激活的是预测标签页，显示预测内容
+        if (document.getElementById("predict").classList.contains("active")) {
+          showPredictContent();
+        }
+
+        // 如果当前激活的是模型评估标签页，显示评估内容
+        if (document.getElementById("eval").classList.contains("active")) {
+          showEvalContent();
+        }
+
+        // 如果当前激活的是AI分析标签页，显示AI内容
+        if (document.getElementById("ai").classList.contains("active")) {
+          showAiContent();
+        }
+      }
+
+      // 显示预测内容
+      function showPredictContent() {
+        const uploadPrompt = document.getElementById("uploadPrompt");
+        const userSelectWrapper = document.getElementById("userSelectWrapper");
+        const userIdSelect = document.getElementById("userIdSelect");
+
+        // 隐藏提示信息，显示用户选择
         uploadPrompt.style.display = "none";
         userSelectWrapper.style.display = "block";
-        populateUserSelect();
 
-        // 显示表单分类标题和内容
+        // 显示各个属性分组
         document.querySelectorAll(".category").forEach((el) => {
           el.style.display = "flex";
         });
@@ -2242,755 +2062,797 @@
         document.getElementById("appUsage").style.display = "grid";
         document.getElementById("consumptionFeatures").style.display = "grid";
         document.getElementById("locationFeatures").style.display = "grid";
-        document.getElementById("analysisButtonGroup").style.display = "flex";
+        document.getElementById("predictionButtons").style.display = "flex";
 
-        // 更新模型评估标签
-        document.getElementById("evalUploadPrompt").style.display = "none";
-        document.getElementById("generateEvalButtonGroup").style.display =
-          "flex";
-
-        // 更新AI分析标签
-        document.getElementById("aiUploadPrompt").style.display = "none";
-        document.getElementById("aiAnalysisArea").style.display = "block";
-      }
-
-      // 填充用户选择下拉框
-      function populateUserSelect() {
-        if (!csvData || csvData.length === 0) return;
-
-        // 清空现有选项
+        // 填充用户选择下拉框
         userIdSelect.innerHTML = "";
-
-        // 添加默认选项
         const defaultOption = document.createElement("option");
         defaultOption.value = "";
         defaultOption.textContent = "请选择用户";
         userIdSelect.appendChild(defaultOption);
 
-        // 添加用户选项
-        csvData.forEach((row, index) => {
-          const option = document.createElement("option");
-          option.value = index;
-          option.textContent = `用户 ${row.USER_ID || `#${index + 1}`}`;
-          userIdSelect.appendChild(option);
+        csvData.forEach((user, index) => {
+          if (user.USER_ID) {
+            const option = document.createElement("option");
+            option.value = index; // 使用索引作为值
+            option.textContent = `用户 ${user.USER_ID} (${
+              user.CITY || "未知城市"
+            })`;
+            userIdSelect.appendChild(option);
+          }
         });
 
-        // 启用下拉框
+        // 启用下拉框和按钮
         userIdSelect.disabled = false;
+        document.getElementById("resetBtn").disabled = false;
       }
 
-      // 处理用户选择变化
-      function handleUserSelection() {
-        const selectedIndex = userIdSelect.value;
-        if (!selectedIndex) {
-          // 重置表单
-          resetUserForm();
-          return;
-        }
+      // 初始化用户选择功能
+      function initUserSelection() {
+        const userIdSelect = document.getElementById("userIdSelect");
 
-        // 获取选中的用户数据
-        const userData = csvData[selectedIndex];
-        if (!userData) return;
+        userIdSelect.addEventListener("change", function () {
+          const selectedIndex = this.value;
+          if (!selectedIndex) return;
 
-        // 填充表单数据
-        populateUserForm(userData);
+          const selectedUser = csvData[selectedIndex];
+          if (!selectedUser) return;
 
-        // 隐藏之前的预测结果
-        document.getElementById("predictionResult").classList.remove("active");
-      }
+          // 填充表单数据
+          fillUserForm(selectedUser);
 
-      // 重置用户表单
-      function resetUserForm() {
-        const formFields = [
-          "USER_ID",
-          "MSISDN",
-          "PROV",
-          "CITY",
-          "AGE",
-          "INNET_DURA",
-          "TERM_BRAND",
-          "IS_ORD_5G_PACKAGE",
-          "PRI_PACKAGE_FEE",
-          "IS_DUALSIM_USER",
-          "PACKAGE_TYP",
-          "IS_TERM_CONTR_USER",
-          "day_flux",
-          "night_flux",
-          "L3M_AVG_23G_FLUX_RATE",
-          "L3M_AVG_FLUX_USE_CNT",
-          "N3M_AVG_GAME_APP_USE_DAYS",
-          "N3M_AVG_SOCIAL_APP_USE_DAYS",
-          "N3M_AVG_MUSIC_APP_USE_DAYS",
-          "N3M_AVG_VIDEO_APP_USE_DAYS",
-          "N3M_AVG_SHOP_APP_USE_DAYS",
-          "N3M_AVG_LEARN_APP_USE_DAYS",
-          "DIS_ARPU",
-          "N3M_AVG_DIS_ARPU",
-          "ACCT_BAL",
-          "L3M_AVG_VOICE_OVER_FEE",
-          "L3M_AVG_FLUX_OVER_FEE",
-          "T_school_resident",
-          "T_company_resident",
-        ];
+          // 启用预测按钮
+          document.getElementById("predictBtn").disabled = false;
 
-        formFields.forEach((field) => {
-          const element = document.getElementById(field);
-          if (element) {
-            if (element.tagName === "INPUT") {
-              element.value = "";
-              element.placeholder = "无数据";
-            } else if (element.tagName === "SELECT") {
-              element.value = "";
-            }
-          }
+          // 隐藏之前的预测结果
+          document
+            .getElementById("predictionResult")
+            .classList.remove("active");
         });
       }
 
       // 填充用户表单数据
-      function populateUserForm(userData) {
-        const formFields = [
-          "USER_ID",
-          "MSISDN",
-          "PROV",
-          "CITY",
-          "AGE",
-          "INNET_DURA",
-          "TERM_BRAND",
-          "PRI_PACKAGE_FEE",
-          "PACKAGE_TYP",
-          "day_flux",
-          "night_flux",
-          "L3M_AVG_23G_FLUX_RATE",
-          "L3M_AVG_FLUX_USE_CNT",
-          "N3M_AVG_GAME_APP_USE_DAYS",
-          "N3M_AVG_SOCIAL_APP_USE_DAYS",
-          "N3M_AVG_MUSIC_APP_USE_DAYS",
-          "N3M_AVG_VIDEO_APP_USE_DAYS",
-          "N3M_AVG_SHOP_APP_USE_DAYS",
-          "N3M_AVG_LEARN_APP_USE_DAYS",
-          "DIS_ARPU",
-          "N3M_AVG_DIS_ARPU",
-          "ACCT_BAL",
-          "L3M_AVG_VOICE_OVER_FEE",
-          "L3M_AVG_FLUX_OVER_FEE",
-        ];
+      function fillUserForm(user) {
+        // 基础属性
+        document.getElementById("USER_ID").value = user.USER_ID || "";
+        document.getElementById("MSISDN").value = user.MSISDN || "";
+        document.getElementById("PROV").value = user.PROV || "";
+        document.getElementById("CITY").value = user.CITY || "";
+        document.getElementById("AGE").value = user.AGE || "";
+        document.getElementById("INNET_DURA").value = user.INNET_DURA || "";
 
-        formFields.forEach((field) => {
-          const element = document.getElementById(field);
-          if (element && userData[field] !== undefined) {
-            element.value = userData[field];
-          }
-        });
+        // 终端与套餐信息
+        document.getElementById("TERM_BRAND").value = user.TERM_BRAND || "";
+        setSelectValue("IS_ORD_5G_PACKAGE", user.IS_ORD_5G_PACKAGE);
+        document.getElementById("PRI_PACKAGE_FEE").value =
+          user.PRI_PACKAGE_FEE || "";
+        setSelectValue("IS_DUALSIM_USER", user.IS_DUALSIM_USER);
+        document.getElementById("PACKAGE_TYP").value = user.PACKAGE_TYP || "";
+        setSelectValue("IS_TERM_CONTR_USER", user.IS_TERM_CONTR_USER);
 
-        // 处理下拉框字段
-        const selectFields = [
-          "IS_ORD_5G_PACKAGE",
-          "IS_DUALSIM_USER",
-          "IS_TERM_CONTR_USER",
-          "T_school_resident",
-          "T_company_resident",
-        ];
+        // 网络使用特征
+        document.getElementById("day_flux").value = user.day_flux || "";
+        document.getElementById("night_flux").value = user.night_flux || "";
+        document.getElementById("L3M_AVG_23G_FLUX_RATE").value =
+          user.L3M_AVG_23G_FLUX_RATE || "";
+        document.getElementById("L3M_AVG_FLUX_USE_CNT").value =
+          user.L3M_AVG_FLUX_USE_CNT || "";
 
-        selectFields.forEach((field) => {
-          const element = document.getElementById(field);
-          if (element && userData[field] !== undefined) {
-            // 清空现有选项
-            element.innerHTML = "";
+        // APP使用特征
+        document.getElementById("N3M_AVG_GAME_APP_USE_DAYS").value =
+          user.N3M_AVG_GAME_APP_USE_DAYS || "";
+        document.getElementById("N3M_AVG_SOCIAL_APP_USE_DAYS").value =
+          user.N3M_AVG_SOCIAL_APP_USE_DAYS || "";
+        document.getElementById("N3M_AVG_MUSIC_APP_USE_DAYS").value =
+          user.N3M_AVG_MUSIC_APP_USE_DAYS || "";
+        document.getElementById("N3M_AVG_VIDEO_APP_USE_DAYS").value =
+          user.N3M_AVG_VIDEO_APP_USE_DAYS || "";
+        document.getElementById("N3M_AVG_SHOP_APP_USE_DAYS").value =
+          user.N3M_AVG_SHOP_APP_USE_DAYS || "";
+        document.getElementById("N3M_AVG_LEARN_APP_USE_DAYS").value =
+          user.N3M_AVG_LEARN_APP_USE_DAYS || "";
 
-            // 添加当前值选项
-            const option = document.createElement("option");
-            option.value = userData[field];
-            option.textContent =
-              userData[field] === "1"
-                ? "是"
-                : userData[field] === "0"
-                ? "否"
-                : userData[field];
-            element.appendChild(option);
-          }
+        // 消费特征
+        document.getElementById("DIS_ARPU").value = user.DIS_ARPU || "";
+        document.getElementById("N3M_AVG_DIS_ARPU").value =
+          user.N3M_AVG_DIS_ARPU || "";
+        document.getElementById("ACCT_BAL").value = user.ACCT_BAL || "";
+        document.getElementById("L3M_AVG_VOICE_OVER_FEE").value =
+          user.L3M_AVG_VOICE_OVER_FEE || "";
+        document.getElementById("L3M_AVG_FLUX_OVER_FEE").value =
+          user.L3M_AVG_FLUX_OVER_FEE || "";
+
+        // 位置特征
+        setSelectValue("T_school_resident", user.T_school_resident);
+        setSelectValue("T_company_resident", user.T_company_resident);
+        setSelectValue("T_school_night_resident", user.T_school_night_resident);
+      }
+
+      // 设置下拉框值
+      function setSelectValue(elementId, value) {
+        const select = document.getElementById(elementId);
+        select.innerHTML = "";
+
+        // 添加空选项
+        const emptyOption = document.createElement("option");
+        emptyOption.value = "";
+        emptyOption.textContent = "未知";
+        select.appendChild(emptyOption);
+
+        // 添加是/否选项
+        const yesOption = document.createElement("option");
+        yesOption.value = "1";
+        yesOption.textContent = "是";
+        select.appendChild(yesOption);
+
+        const noOption = document.createElement("option");
+        noOption.value = "0";
+        noOption.textContent = "否";
+        select.appendChild(noOption);
+
+        // 设置选中值
+        if (value !== undefined && value !== null) {
+          select.value = value.toString();
+        }
+      }
+
+      // 初始化预测按钮
+      function initPredictButton() {
+        const predictBtn = document.getElementById("predictBtn");
+        const predictLoading = document.getElementById("predictLoading");
+        const predictionResult = document.getElementById("predictionResult");
+
+        predictBtn.addEventListener("click", function () {
+          const selectedIndex = document.getElementById("userIdSelect").value;
+          if (!selectedIndex) return;
+
+          const selectedUser = csvData[selectedIndex];
+          if (!selectedUser) return;
+
+          // 显示加载状态
+          predictLoading.classList.add("active");
+          predictionResult.classList.remove("active");
+
+          // 模拟预测过程
+          setTimeout(() => {
+            // 生成预测结果
+            generatePredictionResult(selectedUser);
+
+            // 隐藏加载状态，显示结果
+            predictLoading.classList.remove("active");
+            predictionResult.classList.add("active");
+          }, 1500);
         });
       }
 
-      // 分析用户特征
-      function analyzeUser() {
-        const selectedIndex = userIdSelect.value;
-        if (!selectedIndex) {
-          alert("请先选择一个用户");
-          return;
+      // 生成预测结果
+      function generatePredictionResult(user) {
+        const predictionResult = document.getElementById("predictionResult");
+
+        // 基于用户数据确定客群类型
+        let userType = "";
+        let confidence = 0;
+        let description = "";
+        let recommendations = [];
+
+        // 简单的客群分类逻辑
+        if (user.AGE < 22 && user.N3M_AVG_GAME_APP_USE_DAYS > 15) {
+          userType = "游戏娱乐型";
+          confidence = 85 + Math.random() * 10;
+          description =
+            "该用户属于游戏娱乐型Z世代用户，年龄较轻，游戏APP使用频率高，对新鲜事物接受度高，倾向于沉浸式娱乐体验。";
+          recommendations = [
+            "推荐高流量游戏套餐，满足其游戏需求",
+            "可推送热门游戏资讯和新游上线信息",
+            "考虑与游戏平台合作推出联合会员",
+          ];
+        } else if (
+          user.N3M_AVG_SOCIAL_APP_USE_DAYS > 20 &&
+          user.N3M_AVG_VIDEO_APP_USE_DAYS > 15
+        ) {
+          userType = "社交娱乐型";
+          confidence = 80 + Math.random() * 10;
+          description =
+            "该用户属于社交娱乐型Z世代用户，频繁使用社交和视频类APP，注重社交互动和内容消费，是流行文化的积极参与者。";
+          recommendations = [
+            "推荐包含社交平台专属流量包的套餐",
+            "可推送热门影视、综艺资讯",
+            "考虑与短视频平台合作推出专属权益",
+          ];
+        } else if (
+          user.N3M_AVG_LEARN_APP_USE_DAYS > 10 &&
+          user.T_school_resident === "1"
+        ) {
+          userType = "学习进取型";
+          confidence = 78 + Math.random() * 10;
+          description =
+            "该用户属于学习进取型Z世代用户，有较高的学习意愿，可能是在校学生，注重自我提升和知识获取。";
+          recommendations = [
+            "推荐校园专属套餐和学习类APP会员",
+            "可推送在线课程优惠信息",
+            "考虑与教育平台合作推出学生权益",
+          ];
+        } else if (user.N3M_AVG_SHOP_APP_USE_DAYS > 15 && user.DIS_ARPU > 100) {
+          userType = "消费活跃型";
+          confidence = 82 + Math.random() * 10;
+          description =
+            "该用户属于消费活跃型Z世代用户，购物APP使用频繁，消费能力较强，对电商活动和优惠信息敏感度高。";
+          recommendations = [
+            "推荐包含购物返现或积分的套餐",
+            "可推送电商平台优惠活动信息",
+            "考虑与主流电商平台合作推出联合会员",
+          ];
+        } else {
+          userType = "综合均衡型";
+          confidence = 75 + Math.random() * 10;
+          description =
+            "该用户属于综合均衡型Z世代用户，各项APP使用较为均衡，没有特别突出的偏好，需求多样化。";
+          recommendations = [
+            "推荐性价比高的综合套餐",
+            "可根据季节和节日推送多元化内容",
+            "考虑提供灵活的套餐组合选择",
+          ];
         }
 
-        // 获取选中的用户数据
-        const userData = csvData[selectedIndex];
-        if (!userData) return;
+        // 构建结果HTML
+        predictionResult.innerHTML = `
+          <div class="prediction-header">
+            <h3 class="prediction-title">
+              客群识别结果
+              <span class="prediction-badge">匹配度 ${confidence.toFixed(
+                1
+              )}%</span>
+            </h3>
+          </div>
+          <div class="result-content">
+            <div class="result-metric">
+              <div class="metric-label">用户ID</div>
+              <div class="metric-value">${user.USER_ID || "未知"}</div>
+            </div>
+            <div class="result-metric">
+              <div class="metric-label">识别客群</div>
+              <div class="metric-value highlight">${userType}</div>
+            </div>
+            <div class="result-metric">
+              <div class="metric-label">客群描述</div>
+              <div class="metric-value">${description}</div>
+            </div>
+            <div class="result-metric">
+              <div class="metric-label">运营建议</div>
+              <ul class="recommendation-list">
+                ${recommendations.map((rec) => `<li>${rec}</li>`).join("")}
+              </ul>
+            </div>
+          </div>
+        `;
+      }
 
-        // 显示加载状态
-        document.getElementById("predictionLoading").classList.add("active");
-        document.getElementById("predictionResult").classList.remove("active");
+      // 初始化重置按钮
+      function initResetButton() {
+        const resetBtn = document.getElementById("resetBtn");
 
-        // 模拟分析过程
-        setTimeout(() => {
-          // 隐藏加载状态
-          document
-            .getElementById("predictionLoading")
-            .classList.remove("active");
+        resetBtn.addEventListener("click", function () {
+          // 重置下拉框
+          document.getElementById("userIdSelect").value = "";
 
-          // 生成客群识别结果
-          const result = generateUserGroupPrediction(userData);
-
-          // 显示结果
-          document.getElementById("predictedGroup").textContent = result.group;
-          document.getElementById(
-            "predictionConfidence"
-          ).textContent = `匹配度: ${result.confidence}%`;
-          document.getElementById("userFeatureSummary").textContent =
-            result.summary;
-
-          // 生成建议列表
-          const recommendationsList =
-            document.getElementById("recommendations");
-          recommendationsList.innerHTML = "";
-          result.recommendations.forEach((rec) => {
-            const li = document.createElement("li");
-            li.textContent = rec;
-            recommendationsList.appendChild(li);
+          // 清空表单
+          document.querySelectorAll(".form-input").forEach((input) => {
+            if (input.tagName === "INPUT") {
+              input.value = "";
+            } else if (input.tagName === "SELECT") {
+              input.value = "";
+            }
           });
 
-          // 显示结果
-          document.getElementById("predictionResult").classList.add("active");
-        }, 1500);
+          // 禁用预测按钮
+          document.getElementById("predictBtn").disabled = true;
+
+          // 隐藏预测结果
+          document
+            .getElementById("predictionResult")
+            .classList.remove("active");
+        });
       }
 
-      // 生成用户客群预测
-      function generateUserGroupPrediction(userData) {
-        // 简单的规则引擎来识别用户群体
-        const age = parseInt(userData.AGE || 0);
-        const is5G = userData.IS_ORD_5G_PACKAGE === "1";
-        const arpu = parseFloat(userData.DIS_ARPU || 0);
-        const gameUsage = parseFloat(userData.N3M_AVG_GAME_APP_USE_DAYS || 0);
-        const socialUsage = parseFloat(
-          userData.N3M_AVG_SOCIAL_APP_USE_DAYS || 0
-        );
-        const videoUsage = parseFloat(userData.N3M_AVG_VIDEO_APP_USE_DAYS || 0);
-        const schoolResident = userData.T_school_resident === "1";
+      // 显示评估内容
+      function showEvalContent() {
+        const evalUploadPrompt = document.getElementById("evalUploadPrompt");
+        const evalContent = document.getElementById("evalContent");
 
-        // 学生群体
-        if (schoolResident && age >= 18 && age <= 24) {
-          return {
-            group: "校园活力族",
-            confidence: Math.min(90 + (age > 22 ? -10 : 0), 95),
-            summary: `该用户为${age}岁的校园用户，${
-              is5G ? "已开通5G套餐" : "使用4G套餐"
-            }，月均消费${arpu}元。偏好${
-              socialUsage > gameUsage ? "社交" : "游戏"
-            }类应用，同时也经常使用视频类应用。`,
-            recommendations: [
-              "推荐校园专属5G套餐，包含更多定向流量",
-              "推出社交/游戏APP定向流量包优惠",
-              "结合开学季、毕业季等时间节点开展促销活动",
-              "考虑与校园周边商户合作推出联名优惠",
-            ],
-          };
-        }
+        // 隐藏提示信息，显示评估内容
+        evalUploadPrompt.style.display = "none";
+        evalContent.style.display = "block";
 
-        // 游戏爱好者
-        if (
-          gameUsage > 15 &&
-          gameUsage > socialUsage &&
-          gameUsage > videoUsage
-        ) {
-          return {
-            group: "电竞达人",
-            confidence: Math.min(85 + (is5G ? 5 : 0), 95),
-            summary: `该用户是重度游戏爱好者，平均每月使用游戏类应用${gameUsage}天，${
-              is5G
-                ? "已开通5G套餐，网络体验较好"
-                : "使用非5G套餐，可能需要更好的网络体验"
-            }。月均消费${arpu}元。`,
-            recommendations: [
-              "推荐高网速、低延迟的5G游戏套餐",
-              "推出游戏定向流量包和加速服务",
-              "与热门游戏合作开展联名活动或提供虚拟道具",
-              "考虑推荐游戏外设相关产品优惠",
-            ],
-          };
-        }
-
-        // 社交达人
-        if (
-          socialUsage > 15 &&
-          socialUsage > gameUsage &&
-          socialUsage > videoUsage
-        ) {
-          return {
-            group: "社交达人",
-            confidence: 85,
-            summary: `该用户是社交活跃用户，平均每月使用社交类应用${socialUsage}天，${
-              is5G ? "已开通5G套餐" : "使用非5G套餐"
-            }。月均消费${arpu}元。`,
-            recommendations: [
-              "推荐包含更多语音通话和社交APP定向流量的套餐",
-              "推出多人共享套餐，适合与朋友家人共享",
-              "考虑与社交平台合作推出专属活动",
-              "提供云存储服务优惠，方便用户存储社交内容",
-            ],
-          };
-        }
-
-        // 视频爱好者
-        if (
-          videoUsage > 15 &&
-          videoUsage > gameUsage &&
-          videoUsage > socialUsage
-        ) {
-          return {
-            group: "视频娱乐族",
-            confidence: 85,
-            summary: `该用户是视频内容重度消费者，平均每月使用视频类应用${videoUsage}天，${
-              is5G ? "已开通5G套餐" : "使用非5G套餐"
-            }。月均消费${arpu}元。`,
-            recommendations: [
-              "推荐包含大容量视频定向流量的套餐",
-              "与主流视频平台合作推出联合会员",
-              "考虑推出夜间流量包优惠，适合夜间观看习惯",
-              "推荐高清视频适配的5G套餐",
-            ],
-          };
-        }
-
-        // 高消费用户
-        if (arpu > 100) {
-          return {
-            group: "品质生活族",
-            confidence: 80 + (is5G ? 5 : 0),
-            summary: `该用户为高价值客户，月均消费${arpu}元，${
-              is5G ? "已开通5G套餐" : "使用非5G套餐，可考虑升级"
-            }。综合使用各类应用，消费能力强。`,
-            recommendations: [
-              "推荐高端5G套餐，包含更多权益和服务",
-              "提供专属客服和优先办理服务",
-              "推荐终端合约计划，享受高端机型优惠",
-              "邀请参与新品体验和高端活动",
-            ],
-          };
-        }
-
-        // 默认群体
-        return {
-          group: "综合均衡族",
-          confidence: 75,
-          summary: `该用户为${age}岁，${
-            is5G ? "已开通5G套餐" : "使用非5G套餐"
-          }，月均消费${arpu}元。应用使用较为均衡，没有特别突出的偏好。`,
-          recommendations: [
-            "推荐性价比高的综合套餐",
-            "根据季节和节日推出短期优惠活动",
-            "考虑推荐适合其年龄段的增值服务",
-            "提供套餐个性化定制选项",
-          ],
-        };
+        // 生成评估报告
+        generateEvalReport();
       }
 
       // 生成评估报告
       function generateEvalReport() {
-        // 显示加载状态
-        document.getElementById("evalLoading").classList.add("active");
-        document.getElementById("evalReportContent").style.display = "none";
+        const evalContent = document.getElementById("evalContent");
 
-        // 模拟生成报告过程
-        setTimeout(() => {
-          // 隐藏加载状态
-          document.getElementById("evalLoading").classList.remove("active");
+        // 简单的评估指标计算
+        const totalUsers = csvData.length;
+        const ageDistribution = calculateAgeDistribution();
+        const cityCount = new Set(
+          csvData.map((user) => user.CITY).filter(Boolean)
+        ).size;
+        const avgARPU = calculateAverage("N3M_AVG_DIS_ARPU");
+        const fiveGAdoptionRate = calculateRate("IS_ORD_5G_PACKAGE", "1");
+        const dualSimRate = calculateRate("IS_DUALSIM_USER", "1");
+        const schoolResidentRate = calculateRate("T_school_resident", "1");
 
-          // 显示报告内容
-          document.getElementById("evalReportContent").style.display = "block";
+        // 构建评估报告HTML
+        evalContent.innerHTML = `
+          <div class="eval-report-card">
+            <div class="eval-header">
+              <h3 class="eval-title">数据概览</h3>
+            </div>
+            <div class="eval-metrics">
+              <div class="eval-metric-item">
+                <div class="eval-metric-label">总用户数</div>
+                <div class="eval-metric-value">${totalUsers}</div>
+              </div>
+              <div class="eval-metric-item">
+                <div class="eval-metric-label">覆盖城市数</div>
+                <div class="eval-metric-value">${cityCount}</div>
+              </div>
+              <div class="eval-metric-item">
+                <div class="eval-metric-label">平均ARPU值(元)</div>
+                <div class="eval-metric-value">${avgARPU.toFixed(2)}</div>
+              </div>
+              <div class="eval-metric-item">
+                <div class="eval-metric-label">5G套餐渗透率</div>
+                <div class="eval-metric-value">${fiveGAdoptionRate.toFixed(
+                  1
+                )}%</div>
+              </div>
+            </div>
+          </div>
 
-          // 填充评估指标
-          document.getElementById("accuracy").textContent = "87.5%";
-          document.getElementById("precision").textContent = "86.2%";
-          document.getElementById("recall").textContent = "85.8%";
-          document.getElementById("f1Score").textContent = "86.0%";
+          <div class="chart-grid" style="margin-top: 2rem;">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">
+                  <i class="fas fa-calendar-alt"></i> 年龄分布比例
+                </h3>
+              </div>
+              <div class="chart-container" id="evalAgeChart"></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">
+                  <i class="fas fa-mobile-alt"></i> 用户特征指标
+                </h3>
+              </div>
+              <div class="chart-container" id="evalFeatureChart"></div>
+            </div>
+          </div>
 
-          // 生成评估图表
-          generatePrecisionChart();
-          generateRecallChart();
-          generateConfusionMatrix();
-        }, 2000);
-      }
+          <div class="eval-report-card" style="margin-top: 2rem;">
+            <div class="eval-header">
+              <h3 class="eval-title">特征重要性分析</h3>
+            </div>
+            <div class="chart-container" id="featureImportanceChart" style="height: 400px;"></div>
+          </div>
+        `;
 
-      // 生成精确率图表
-      function generatePrecisionChart() {
-        const precisionChart = echarts.init(
-          document.getElementById("precisionChart")
-        );
-
-        // 模拟数据
-        const groups = [
-          "校园活力族",
-          "电竞达人",
-          "社交达人",
-          "视频娱乐族",
-          "品质生活族",
-          "综合均衡族",
-        ];
-        const precision = [0.89, 0.92, 0.85, 0.87, 0.9, 0.82];
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "axis",
-            axisPointer: {
-              type: "shadow",
-            },
-            formatter: "{b}: {c}%",
-          },
-          grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-          },
-          xAxis: {
-            type: "value",
-            max: 100,
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-              formatter: "{value}%",
-            },
-          },
-          yAxis: {
-            type: "category",
-            data: groups,
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "精确率",
-              type: "bar",
-              data: precision.map((value, index) => ({
-                value: value * 100,
-                itemStyle: {
-                  color: getColorByIndex(index),
-                },
-              })),
-              barWidth: "60%",
-            },
-          ],
-        };
-
-        precisionChart.setOption(option);
-
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          precisionChart.resize();
+        // 生成评估图表
+        generateEvalAgeChart(ageDistribution);
+        generateEvalFeatureChart({
+          fiveGAdoptionRate,
+          dualSimRate,
+          schoolResidentRate,
         });
+        generateFeatureImportanceChart();
       }
 
-      // 生成召回率图表
-      function generateRecallChart() {
-        const recallChart = echarts.init(
-          document.getElementById("recallChart")
+      // 生成评估年龄图表
+      function generateEvalAgeChart(ageDistribution) {
+        const evalAgeChart = echarts.init(
+          document.getElementById("evalAgeChart")
         );
-
-        // 模拟数据
-        const groups = [
-          "校园活力族",
-          "电竞达人",
-          "社交达人",
-          "视频娱乐族",
-          "品质生活族",
-          "综合均衡族",
-        ];
-        const recall = [0.87, 0.89, 0.86, 0.88, 0.83, 0.82];
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "axis",
-            axisPointer: {
-              type: "shadow",
-            },
-            formatter: "{b}: {c}%",
-          },
-          grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-          },
-          xAxis: {
-            type: "value",
-            max: 100,
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-              formatter: "{value}%",
-            },
-          },
-          yAxis: {
-            type: "category",
-            data: groups,
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "召回率",
-              type: "bar",
-              data: recall.map((value, index) => ({
-                value: value * 100,
-                itemStyle: {
-                  color: getColorByIndex(index),
-                },
-              })),
-              barWidth: "60%",
-            },
-          ],
-        };
-
-        recallChart.setOption(option);
-
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          recallChart.resize();
-        });
-      }
-
-      // 生成混淆矩阵
-      function generateConfusionMatrix() {
-        const confusionMatrix = echarts.init(
-          document.getElementById("confusionMatrix")
-        );
-
-        // 模拟混淆矩阵数据
-        const groups = [
-          "校园活力族",
-          "电竞达人",
-          "社交达人",
-          "视频娱乐族",
-          "品质生活族",
-          "综合均衡族",
-        ];
-        const data = [
-          [89, 3, 2, 2, 1, 3],
-          [2, 92, 1, 2, 2, 1],
-          [3, 1, 85, 4, 2, 5],
-          [1, 2, 3, 87, 3, 4],
-          [2, 3, 1, 2, 83, 9],
-          [4, 2, 5, 3, 8, 82],
-        ];
 
         // 配置图表
         const option = {
           tooltip: {
             trigger: "item",
-            formatter: "预测为 {b}<br>实际为 {a}<br>数量: {c}",
+            formatter: "{a} <br/>{b}: {c} ({d}%)",
           },
-          grid: {
-            left: "15%",
-            right: "10%",
-            bottom: "15%",
-          },
-          xAxis: {
-            type: "category",
-            data: groups,
-            name: "预测类别",
-            nameLocation: "middle",
-            nameGap: 30,
-            nameTextStyle: {
-              color: "#e2e8f0",
-            },
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-              rotate: 30,
-            },
-          },
-          yAxis: {
-            type: "category",
-            data: groups,
-            name: "实际类别",
-            nameLocation: "middle",
-            nameGap: 50,
-            nameTextStyle: {
-              color: "#e2e8f0",
-            },
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          visualMap: {
-            min: 0,
-            max: 100,
-            calculable: true,
-            orient: "horizontal",
-            left: "center",
-            bottom: "0%",
+          legend: {
+            orient: "vertical",
+            left: 10,
             textStyle: {
               color: "#e2e8f0",
             },
           },
           series: [
             {
-              name: "混淆矩阵",
-              type: "heatmap",
-              data: data.flatMap((row, i) =>
-                row.map((value, j) => ({
-                  value,
-                  itemStyle: {
-                    color: i === j ? "#6366f1" : undefined, // 对角线使用主色调
-                  },
-                }))
-              ),
+              name: "年龄分组",
+              type: "pie",
+              radius: ["40%", "70%"],
+              avoidLabelOverlap: false,
+              itemStyle: {
+                borderRadius: 10,
+                borderColor: "#1e293b",
+                borderWidth: 2,
+              },
               label: {
-                show: true,
-                color: "#fff",
+                show: false,
+                position: "center",
+              },
+              emphasis: {
+                label: {
+                  show: true,
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: "#fff",
+                },
+              },
+              labelLine: {
+                show: false,
+              },
+              data: Object.entries(ageDistribution).map(([name, value]) => ({
+                name,
+                value,
+                itemStyle: {
+                  color: getColorByIndex(
+                    Object.keys(ageDistribution).indexOf(name)
+                  ),
+                },
+              })),
+            },
+          ],
+        };
+
+        evalAgeChart.setOption(option);
+
+        // 响应窗口大小变化
+        window.addEventListener("resize", () => {
+          evalAgeChart.resize();
+        });
+      }
+
+      // 生成评估特征图表
+      function generateEvalFeatureChart(metrics) {
+        const evalFeatureChart = echarts.init(
+          document.getElementById("evalFeatureChart")
+        );
+
+        // 配置图表
+        const option = {
+          tooltip: {
+            trigger: "axis",
+            axisPointer: {
+              type: "shadow",
+            },
+            formatter: "{b}: {c}%",
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "3%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "value",
+            max: 100,
+            axisLine: {
+              lineStyle: {
+                color: "#94a3b8",
+              },
+            },
+            axisLabel: {
+              color: "#e2e8f0",
+              formatter: "{value}%",
+            },
+          },
+          yAxis: {
+            type: "category",
+            data: ["5G套餐渗透率", "双卡用户比例", "校园常驻用户比例"],
+            axisLine: {
+              lineStyle: {
+                color: "#94a3b8",
+              },
+            },
+            axisLabel: {
+              color: "#e2e8f0",
+            },
+          },
+          series: [
+            {
+              name: "比例",
+              type: "bar",
+              data: [
+                metrics.fiveGAdoptionRate,
+                metrics.dualSimRate,
+                metrics.schoolResidentRate,
+              ],
+              itemStyle: {
+                color: function (params) {
+                  return getColorByIndex(params.dataIndex);
+                },
               },
             },
           ],
         };
 
-        confusionMatrix.setOption(option);
+        evalFeatureChart.setOption(option);
 
         // 响应窗口大小变化
         window.addEventListener("resize", () => {
-          confusionMatrix.resize();
+          evalFeatureChart.resize();
         });
       }
 
-      // 提交AI分析问题
-      function submitAiQuestion() {
-        const question = document.getElementById("aiQuestion").value.trim();
-        if (!question) {
-          alert("请输入您想分析的问题");
-          return;
-        }
+      // 生成特征重要性图表
+      function generateFeatureImportanceChart() {
+        const featureChart = echarts.init(
+          document.getElementById("featureImportanceChart")
+        );
 
-        // 显示加载状态
-        document.getElementById("aiLoading").classList.add("active");
-        document.getElementById("aiResultCard").classList.remove("active");
+        // 模拟特征重要性数据
+        const features = [
+          { name: "月均消费(ARPU)", importance: 85 },
+          { name: "5G套餐使用", importance: 78 },
+          { name: "游戏APP使用", importance: 72 },
+          { name: "社交APP使用", importance: 68 },
+          { name: "视频APP使用", importance: 65 },
+          { name: "年龄", importance: 60 },
+          { name: "城市", importance: 45 },
+          { name: "入网时长", importance: 40 },
+          { name: "终端品牌", importance: 35 },
+          { name: "是否校园常驻", importance: 30 },
+        ];
 
-        // 模拟AI分析过程
-        setTimeout(() => {
-          // 隐藏加载状态
-          document.getElementById("aiLoading").classList.remove("active");
+        // 配置图表
+        const option = {
+          tooltip: {
+            trigger: "axis",
+            axisPointer: {
+              type: "shadow",
+            },
+          },
+          grid: {
+            left: "3%",
+            right: "4%",
+            bottom: "3%",
+            containLabel: true,
+          },
+          xAxis: {
+            type: "value",
+            max: 100,
+            axisLine: {
+              lineStyle: {
+                color: "#94a3b8",
+              },
+            },
+            axisLabel: {
+              color: "#e2e8f0",
+            },
+          },
+          yAxis: {
+            type: "category",
+            data: features.map((f) => f.name),
+            axisLine: {
+              lineStyle: {
+                color: "#94a3b8",
+              },
+            },
+            axisLabel: {
+              color: "#e2e8f0",
+            },
+          },
+          series: [
+            {
+              name: "重要性分数",
+              type: "bar",
+              data: features.map((f) => f.importance),
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                  { offset: 0, color: "#6366f1" },
+                  { offset: 1, color: "#ec4899" },
+                ]),
+              },
+            },
+          ],
+        };
 
-          // 生成模拟的AI回答
-          const answer = generateAiAnswer(question);
+        featureChart.setOption(option);
 
-          // 显示结果
-          document.getElementById("aiResultContent").textContent = answer;
-          document.getElementById("aiResultCard").classList.add("active");
-        }, 2500);
+        // 响应窗口大小变化
+        window.addEventListener("resize", () => {
+          featureChart.resize();
+        });
       }
 
-      // 清空AI问题输入
-      function clearAiQuestion() {
-        document.getElementById("aiQuestion").value = "";
-        document.getElementById("aiResultCard").classList.remove("active");
+      // 显示AI内容
+      function showAiContent() {
+        const aiUploadPrompt = document.getElementById("aiUploadPrompt");
+        const aiContent = document.getElementById("aiContent");
+
+        // 隐藏提示信息，显示AI内容
+        aiUploadPrompt.style.display = "none";
+        aiContent.style.display = "block";
       }
 
-      // 生成AI回答（模拟）
-      function generateAiAnswer(question) {
-        // 简单的问题匹配和回答生成
-        if (question.includes("年龄") || question.includes("岁")) {
-          return `根据分析，Z世代用户的年龄主要分布在18-30岁之间，其中18-22岁的用户占比约42%，23-25岁的用户占比约31%，26-30岁的用户占比约27%。
+      // 初始化AI分析按钮
+      function initAiAnalysisButton() {
+        const generateBtn = document.getElementById("generateAnalysis");
+        const aiLoading = document.getElementById("aiLoading");
+        const analysisResult = document.getElementById("analysisResult");
+        const analysisContent = document.getElementById("analysisContent");
 
-这个年龄段的用户普遍处于大学阶段到刚步入社会的时期，消费观念较为开放，对新鲜事物接受度高，是各类数字服务的主要消费群体。
+        generateBtn.addEventListener("click", function () {
+          const prompt = document.getElementById("analysisPrompt").value;
 
-建议针对不同年龄段的细分需求制定差异化的产品策略，例如为18-22岁的大学生群体提供高性价比的套餐，为26-30岁的职场新人提供更注重品质和服务的套餐。`;
-        }
+          // 显示加载状态
+          aiLoading.classList.add("active");
+          analysisResult.classList.remove("active");
 
-        if (
-          question.includes("消费") ||
-          question.includes("花费") ||
-          question.includes("ARPU")
-        ) {
-          return `根据数据分析，Z世代用户的月均ARPU值（每用户平均收入）约为85元，高于整体用户平均水平。
+          // 模拟AI分析过程
+          setTimeout(() => {
+            // 生成分析报告
+            const report = generateAnalysisReport(prompt);
+            analysisContent.textContent = report;
 
-消费特征呈现以下特点：
-1. 5G套餐用户占比达68%，远高于其他年龄段
-2. 流量消耗大，平均每月使用流量约15GB，其中视频和社交应用占比最高
-3. 对增值服务的付费意愿强，尤其是游戏、视频会员等数字内容
-4. 消费波动性较大，受促销活动和新品发布影响明显
-
-建议优化5G套餐结构，增加定向流量包选项，并与热门数字内容提供商合作推出联合会员，提高用户粘性和ARPU值。`;
-        }
-
-        if (
-          question.includes("APP") ||
-          question.includes("应用") ||
-          question.includes("偏好")
-        ) {
-          return `Z世代用户的APP使用偏好分析显示：
-
-1. 社交类应用使用频率最高，平均每月使用25天以上
-2. 视频类应用（包括短视频和长视频）日均使用时长超过2小时
-3. 游戏应用在男性用户中渗透率达78%，女性用户中达52%
-4. 购物类应用使用频率呈季节性波动，节假日前后明显上升
-5. 学习类应用在学生群体中使用频率较高，尤其是在学期中
-
-建议针对这些偏好，推出相应的定向流量包和增值服务，同时可以考虑与热门APP合作开展联合营销活动，提高用户活跃度和套餐价值感知。`;
-        }
-
-        // 默认回答
-        return `根据对Z世代用户数据的综合分析，我们可以得出以下几点关键洞察：
-
-1. 网络行为特征：Z世代用户是5G服务的主要采用者，对网络速度和稳定性有较高要求，日均上网时长超过5小时。
-
-2. 消费习惯：倾向于选择灵活、个性化的套餐，对价格敏感但也愿意为优质内容和服务付费。
-
-3. 设备使用：90%以上使用智能手机，其中高端机型占比达45%，更换设备的周期平均为18个月。
-
-4. 社交属性：高度依赖社交网络，群体影响对消费决策的作用明显，口碑传播效果显著。
-
-建议运营商针对这些特点，推出更具弹性的套餐方案，加强与内容提供商的合作，同时利用社交营销手段扩大影响力。`;
+            // 隐藏加载状态，显示结果
+            aiLoading.classList.remove("active");
+            analysisResult.classList.add("active");
+          }, 2000);
+        });
       }
 
-      // 辅助函数：根据索引获取颜色
+      // 生成AI分析报告
+      function generateAnalysisReport(customPrompt) {
+        // 计算一些基本统计数据
+        const totalUsers = csvData.length;
+        const ageDistribution = calculateAgeDistribution();
+        const avgARPU = calculateAverage("N3M_AVG_DIS_ARPU");
+        const fiveGAdoptionRate = calculateRate("IS_ORD_5G_PACKAGE", "1");
+
+        // 计算APP使用情况
+        const appUsage = {
+          游戏: calculateAverage("N3M_AVG_GAME_APP_USE_DAYS"),
+          社交: calculateAverage("N3M_AVG_SOCIAL_APP_USE_DAYS"),
+          音乐: calculateAverage("N3M_AVG_MUSIC_APP_USE_DAYS"),
+          视频: calculateAverage("N3M_AVG_VIDEO_APP_USE_DAYS"),
+          购物: calculateAverage("N3M_AVG_SHOP_APP_USE_DAYS"),
+          学习: calculateAverage("N3M_AVG_LEARN_APP_USE_DAYS"),
+        };
+
+        // 找到最受欢迎的APP类型
+        const topAppType = Object.entries(appUsage).sort(
+          (a, b) => b[1] - a[1]
+        )[0];
+
+        // 基础报告内容
+        let report = `Z世代用户画像分析报告\n\n`;
+        report += `分析基于${totalUsers}位Z世代用户的样本数据，主要发现如下：\n\n`;
+
+        report += `1. 年龄分布：\n`;
+        Object.entries(ageDistribution).forEach(([group, percentage]) => {
+          report += `   - ${group}: ${percentage.toFixed(1)}%\n`;
+        });
+
+        report += `\n2. 消费特征：\n`;
+        report += `   - 用户月均消费(ARPU)：${avgARPU.toFixed(2)}元\n`;
+        report += `   - 5G套餐渗透率：${fiveGAdoptionRate.toFixed(1)}%\n`;
+
+        report += `\n3. APP使用偏好：\n`;
+        report += `   - 最受欢迎的APP类型是${
+          topAppType[0]
+        }，平均每月使用${topAppType[1].toFixed(1)}天\n`;
+        Object.entries(appUsage).forEach(([type, days]) => {
+          report += `   - ${type}类APP：${days.toFixed(1)}天/月\n`;
+        });
+
+        // 如果有自定义问题，添加针对性分析
+        if (customPrompt && customPrompt.trim() !== "") {
+          report += `\n4. 针对问题"${customPrompt}"的分析：\n`;
+          report += `   根据数据分析，Z世代用户在该方面表现出以下特点：\n`;
+          report += `   - 特征一：与其他年龄段相比，Z世代在该维度上表现更为活跃\n`;
+          report += `   - 特征二：不同城市的用户在该维度上存在显著差异\n`;
+          report += `   - 特征三：该行为与用户的消费能力呈正相关关系\n`;
+        }
+
+        report += `\n5. 总结建议：\n`;
+        report += `   - 针对高渗透率的${topAppType[0]}类应用，可推出专属流量包\n`;
+        report += `   - 考虑到5G套餐的渗透率，建议加强5G相关服务的推广\n`;
+        report += `   - 针对不同年龄组的用户，应设计差异化的产品和服务策略\n`;
+
+        return report;
+      }
+
+      // 辅助函数：计算年龄分布
+      function calculateAgeDistribution() {
+        const ageGroups = {
+          "18岁以下": 0,
+          "18-22岁": 0,
+          "23-26岁": 0,
+          "27-30岁": 0,
+          "30岁以上": 0,
+        };
+
+        let validAgeCount = 0;
+
+        csvData.forEach((user) => {
+          const age = user.AGE;
+          if (age === undefined || isNaN(age)) return;
+
+          validAgeCount++;
+
+          if (age < 18) {
+            ageGroups["18岁以下"]++;
+          } else if (age >= 18 && age <= 22) {
+            ageGroups["18-22岁"]++;
+          } else if (age >= 23 && age <= 26) {
+            ageGroups["23-26岁"]++;
+          } else if (age >= 27 && age <= 30) {
+            ageGroups["27-30岁"]++;
+          } else {
+            ageGroups["30岁以上"]++;
+          }
+        });
+
+        // 转换为百分比
+        Object.keys(ageGroups).forEach((group) => {
+          ageGroups[group] =
+            validAgeCount > 0 ? (ageGroups[group] / validAgeCount) * 100 : 0;
+        });
+
+        return ageGroups;
+      }
+
+      // 辅助函数：计算平均值
+      function calculateAverage(field) {
+        let total = 0;
+        let count = 0;
+
+        csvData.forEach((user) => {
+          if (
+            user[field] !== undefined &&
+            !isNaN(user[field]) &&
+            user[field] > 0
+          ) {
+            total += user[field];
+            count++;
+          }
+        });
+
+        return count > 0 ? total / count : 0;
+      }
+
+      // 辅助函数：计算比例
+      function calculateRate(field, targetValue) {
+        let targetCount = 0;
+        let totalCount = 0;
+
+        csvData.forEach((user) => {
+          if (user[field] !== undefined) {
+            totalCount++;
+            if (user[field].toString() === targetValue) {
+              targetCount++;
+            }
+          }
+        });
+
+        return totalCount > 0 ? (targetCount / totalCount) * 100 : 0;
+      }
+
+      // 辅助函数：获取颜色
       function getColorByIndex(index) {
         const colors = [
-          "#6366f1",
-          "#8b5cf6",
-          "#ec4899",
-          "#f97316",
-          "#10b981",
-          "#06b6d4",
-          "#64748b",
-          "#a855f7",
-          "#fb7185",
-          "#f59e0b",
+          "#6366f1", // 主色
+          "#ec4899", // 辅助色
+          "#10b981", // 成功色
+          "#f59e0b", // 警告色
+          "#ef4444", // 错误色
+          "#8b5cf6", // 紫色
+          "#3b82f6", // 蓝色
+          "#06b6d4", // 青色
         ];
+
         return colors[index % colors.length];
       }
     </script>
