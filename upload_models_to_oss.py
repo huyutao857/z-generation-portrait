@@ -5,7 +5,7 @@ from pathlib import Path  # 更安全的路径处理
 
 # -------------------------- 2. 配置信息（必须替换成你的！） --------------------------
 # 阿里云OSS凭证
-ACCESS_KEY_ID = "LTA15t86RbFrzzyTUnqussE3"       # 替换：步骤2.4获取的AccessKey ID
+ACCESS_KEY_ID = "LTAI5t86RbFrzzyTUnqussE3"       # 替换：步骤2.4获取的AccessKey ID
 ACCESS_KEY_SECRET = "HAunjuGb98whAmvzx2AX34pvmPeBxO" # 替换：步骤2.4获取的AccessKey Secret
 ENDPOINT = "oss-cn-beijing.aliyuncs.com" # 替换：步骤2.3获取的Endpoint
 BUCKET_NAME = "zshidai"          # 替换：步骤2.2创建的Bucket名称
