@@ -1,2860 +1,578 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Z世代用户画像分析（CSV数据版）</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Z世代用户画像与客群识别系统</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-      /* 保持原有样式不变 */
-      :root {
-        --primary: #6366f1;
-        --primary-light: #818cf8;
-        --primary-dark: #4f46e5;
-        --secondary: #ec4899;
-        --secondary-light: #f472b6;
-        --dark: #0f172a;
-        --dark-light: #1e293b;
-        --dark-lighter: #334155;
-        --text: #f8fafc;
-        --text-light: #e2e8f0;
-        --text-muted: #94a3b8;
-        --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
-        --card-gradient: linear-gradient(
-          145deg,
-          var(--dark-light),
-          var(--dark)
-        );
-        --shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        --card-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 20px;
-        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Inter", sans-serif;
-      }
-
-      body {
-        background: var(--dark);
-        color: var(--text);
-        min-height: 100vh;
-        background-image: radial-gradient(
-            circle at 10% 20%,
-            rgba(99, 102, 241, 0.1) 0%,
-            transparent 20%
-          ),
-          radial-gradient(
-            circle at 90% 80%,
-            rgba(236, 72, 153, 0.1) 0%,
-            transparent 20%
-          );
-        padding: 0;
-      }
-
-      .navbar {
-        background: var(--dark-light);
-        padding: 1rem 2rem;
-        box-shadow: var(--shadow);
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .navbar-logo {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-      }
-
-      .logo-icon {
-        width: 40px;
-        height: 40px;
-        background: var(--gradient);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        font-weight: 700;
-      }
-
-      .logo-text {
-        font-size: 1.25rem;
-        font-weight: 700;
-        background: var(--gradient);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-
-      .navbar-tagline {
-        font-size: 0.875rem;
-        color: var(--text-muted);
-        margin-top: 0.2rem;
-      }
-
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
-      }
-
-      .tab-nav {
-        display: flex;
-        gap: 0.5rem;
-        margin-bottom: 2rem;
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
-        scrollbar-width: none;
-      }
-
-      .tab-nav::-webkit-scrollbar {
-        display: none;
-      }
-
-      .tab-btn {
-        padding: 0.8rem 1.8rem;
-        background: var(--dark-light);
-        border: none;
-        border-radius: var(--radius-md);
-        color: var(--text-light);
-        cursor: pointer;
-        font-weight: 500;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        white-space: nowrap;
-      }
-
-      .tab-btn i {
-        font-size: 1rem;
-      }
-
-      .tab-btn:hover {
-        background: var(--dark-lighter);
-        transform: translateY(-2px);
-      }
-
-      .tab-btn.active {
-        background: var(--gradient);
-        color: white;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-      }
-
-      .content-card {
-        display: none;
-        background: var(--card-gradient);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid rgba(99, 102, 241, 0.1);
-      }
-
-      .content-card.active {
-        display: block;
-        animation: fadeIn 0.5s ease forwards;
-      }
-
-      .content-header {
-        margin-bottom: 1.8rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      }
-
-      .content-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-      }
-
-      .content-title i {
-        color: var(--primary-light);
-      }
-
-      .content-desc {
-        margin-top: 0.5rem;
-        color: var(--text-muted);
-        font-size: 0.9rem;
-      }
-
-      /* 数据加载提示样式 */
-      .data-loading {
-        margin-bottom: 2rem;
-        padding: 2rem;
-        background: rgba(30, 41, 59, 0.6);
-        border-radius: var(--radius-md);
-        border: 2px solid rgba(99, 102, 241, 0.3);
-        text-align: center;
-      }
-
-      .data-loading-icon {
-        font-size: 3rem;
-        color: var(--primary-light);
-        margin-bottom: 1rem;
-      }
-
-      .data-loading-text {
-        color: var(--text-light);
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
-      }
-
-      /* CSV上传状态 */
-      .csv-status {
-        margin-top: 1rem;
-        padding: 1rem;
-        border-radius: var(--radius-sm);
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-        display: none;
-      }
-
-      .csv-status.active {
-        display: block;
-      }
-
-      /* 数据预览区域 */
-      .data-preview {
-        margin: 1.5rem 0;
-        padding: 1.5rem;
-        background: rgba(30, 41, 59, 0.6);
-        border-radius: var(--radius-md);
-        border: 1px solid rgba(99, 102, 241, 0.1);
-        display: none;
-      }
-
-      .data-preview.active {
-        display: block;
-      }
-
-      .data-preview-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-
-      .data-preview-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .data-preview-title i {
-        color: var(--primary-light);
-      }
-
-      .data-table-container {
-        max-height: 300px;
-        overflow-y: auto;
-        border-radius: var(--radius-sm);
-        border: 1px solid rgba(148, 163, 184, 0.1);
-      }
-
-      .data-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.85rem;
-      }
-
-      .data-table th,
-      .data-table td {
-        padding: 0.8rem;
-        text-align: left;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        white-space: nowrap;
-      }
-
-      .data-table th {
-        background: rgba(15, 23, 42, 0.5);
-        font-weight: 600;
-        color: var(--primary-light);
-        position: sticky;
-        top: 0;
-      }
-
-      .data-table tr:hover {
-        background: rgba(99, 102, 241, 0.05);
-      }
-
-      .data-table td {
-        color: var(--text-light);
-      }
-
-      .chart-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-      }
-
-      .chart-card {
-        background: rgba(30, 41, 59, 0.6);
-        border-radius: var(--radius-md);
-        padding: 1.5rem;
-        border: 1px solid rgba(99, 102, 241, 0.1);
-        transition: var(--transition);
-        height: 400px;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .chart-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.15);
-        border-color: rgba(99, 102, 241, 0.2);
-      }
-
-      .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        flex-shrink: 0;
-      }
-
-      .chart-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .chart-title i {
-        color: var(--primary-light);
-        font-size: 0.9rem;
-      }
-
-      .chart-container {
-        flex: 1;
-        width: 100% !important;
-        height: 350px !important;
-        min-height: 300px;
-      }
-
-      /* 表单样式 */
-      .form-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin-top: 1rem;
-      }
-
-      .form-group {
-        margin-bottom: 1.2rem;
-      }
-
-      .form-label {
-        display: block;
-        margin-bottom: 0.6rem;
-        color: var(--text);
-        font-weight: 500;
-        font-size: 0.9rem;
-      }
-
-      .form-input {
-        width: 100%;
-        padding: 0.9rem 1rem;
-        background: rgba(30, 41, 59, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.15);
-        border-radius: var(--radius-sm);
-        color: var(--text);
-        font-size: 0.9rem;
-        transition: var(--transition);
-      }
-
-      .form-input:focus {
-        outline: none;
-        border-color: var(--primary-light);
-        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-        background: rgba(30, 41, 59, 1);
-      }
-
-      .form-input::placeholder {
-        color: var(--text-muted);
-      }
-
-      /* 文件上传样式 */
-      .file-upload {
-        margin-bottom: 2rem;
-        padding: 2rem;
-        background: rgba(30, 41, 59, 0.6);
-        border-radius: var(--radius-md);
-        border: 2px dashed rgba(99, 102, 241, 0.3);
-        text-align: center;
-        cursor: pointer;
-        transition: var(--transition);
-      }
-
-      .file-upload:hover {
-        background: rgba(30, 41, 59, 0.8);
-        border-color: var(--primary-light);
-      }
-
-      .file-upload-icon {
-        font-size: 3rem;
-        color: var(--primary-light);
-        margin-bottom: 1rem;
-      }
-
-      .file-upload-text {
-        color: var(--text-light);
-        font-size: 1.1rem;
-        margin-bottom: 0.5rem;
-      }
-
-      .file-upload-hint {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-      }
-
-      #fileInput {
-        display: none;
-      }
-
-      /* 按钮样式 */
-      .btn-group {
-        margin-top: 1.8rem;
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-      }
-
-      .btn-primary,
-      .btn-secondary {
-        padding: 0.9rem 2rem;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 0.9rem;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        border: none;
-      }
-
-      .btn-primary {
-        background: var(--gradient);
-        color: white;
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
-      }
-
-      .btn-secondary {
-        background: rgba(30, 41, 59, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.15);
-        color: var(--text-light);
-      }
-
-      .btn-secondary:hover {
-        background: rgba(30, 41, 59, 1);
-        border-color: rgba(99, 102, 241, 0.2);
-        transform: translateY(-2px);
-      }
-
-      /* 客群识别分类标题 */
-      .category {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--primary-light);
-        margin: 25px 0 15px 0;
-        padding-bottom: 5px;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .category i {
-        font-size: 0.9rem;
-      }
-
-      /* 加载状态 */
-      .loading {
-        display: none;
-        margin: 1.5rem 0;
-        color: var(--primary-light);
-        font-size: 0.9rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .loading.active {
-        display: flex;
-      }
-
-      .loading-spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(99, 102, 241, 0.2);
-        border-radius: 50%;
-        border-top-color: var(--primary-light);
-        animation: spin 1s linear infinite;
-      }
-
-      /* 预测结果 */
-      .prediction-result {
-        margin-top: 2rem;
-        padding: 1.5rem;
-        background: rgba(30, 41, 59, 0.6);
-        border-radius: var(--radius-md);
-        border: 1px solid rgba(99, 102, 241, 0.15);
-        display: none;
-      }
-
-      .prediction-result.active {
-        display: block;
-        animation: slideUp 0.5s ease forwards;
-      }
-
-      .prediction-header {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        margin-bottom: 1rem;
-      }
-
-      .prediction-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text);
-      }
-
-      .prediction-badge {
-        display: inline-block;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        background: rgba(99, 102, 241, 0.2);
-        color: var(--primary-light);
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-left: 0.5rem;
-      }
-
-      .result-content {
-        color: var(--text-light);
-        line-height: 1.8;
-      }
-
-      .result-metric {
-        margin-bottom: 1rem;
-      }
-
-      .metric-label {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        margin-bottom: 0.3rem;
-      }
-
-      .metric-value {
-        font-weight: 600;
-        color: var(--text);
-        font-size: 1rem;
-      }
-
-      .metric-value.highlight {
-        color: var(--primary-light);
-      }
-
-      .recommendation-list {
-        margin-top: 1rem;
-        padding-left: 1.5rem;
-      }
-
-      .recommendation-list li {
-        margin-bottom: 0.8rem;
-        color: var(--text-light);
-        line-height: 1.6;
-      }
-
-      /* AI分析模块 */
-      .ai-textarea {
-        width: 100%;
-        min-height: 180px;
-        padding: 1rem;
-        background: rgba(30, 41, 59, 0.8);
-        border: 1px solid rgba(148, 163, 184, 0.15);
-        border-radius: var(--radius-sm);
-        color: var(--text);
-        font-size: 0.9rem;
-        resize: vertical;
-        transition: var(--transition);
-        line-height: 1.6;
-      }
-
-      .ai-textarea:focus {
-        outline: none;
-        border-color: var(--primary-light);
-        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-        background: rgba(30, 41, 59, 1);
-      }
-
-      .result-card {
-        margin-top: 2rem;
-        padding: 1.8rem;
-        background: rgba(30, 41, 59, 0.6);
-        border-radius: var(--radius-md);
-        border: 1px solid rgba(99, 102, 241, 0.15);
-        display: none;
-      }
-
-      .result-card.active {
-        display: block;
-        animation: slideUp 0.5s ease forwards;
-      }
-
-      .result-header {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        margin-bottom: 1.2rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      }
-
-      .result-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 8px;
-        background: rgba(16, 185, 129, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #10b981;
-      }
-
-      .ai-result-content {
-        white-space: pre-line;
-        color: var(--text-light);
-        line-height: 1.8;
-        font-size: 0.95rem;
-      }
-
-      /* 模型评估模块 */
-      .eval-report-card {
-        margin-top: 2rem;
-        padding: 1.5rem;
-        background: rgba(30, 41, 59, 0.6);
-        border-radius: var(--radius-md);
-        border: 1px solid rgba(99, 102, 241, 0.15);
-      }
-
-      .eval-header {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        margin-bottom: 1rem;
-      }
-
-      .eval-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text);
-      }
-
-      .eval-metrics {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin: 1rem 0;
-      }
-
-      .eval-metric-item {
-        padding: 1rem;
-        background: rgba(15, 23, 42, 0.5);
-        border-radius: var(--radius-sm);
-        border-left: 3px solid var(--primary-light);
-      }
-
-      .eval-metric-label {
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        margin-bottom: 0.3rem;
-      }
-
-      .eval-metric-value {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text);
-      }
-
-      /* 动画 */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      /* 响应式 */
-      @media (max-width: 768px) {
-        .container {
-          padding: 1rem;
-        }
-        .content-card {
-          padding: 1.5rem;
-        }
-        .navbar {
-          padding: 1rem;
-        }
-        .logo-text {
-          font-size: 1rem;
-        }
-        .content-title {
-          font-size: 1.25rem;
-        }
-        .tab-btn {
-          padding: 0.7rem 1.2rem;
-          font-size: 0.85rem;
-        }
-        .btn-primary,
-        .btn-secondary {
-          padding: 0.8rem 1.5rem;
-          font-size: 0.85rem;
-          width: 100%;
-          justify-content: center;
-        }
-        .form-grid {
-          grid-template-columns: 1fr;
-        }
-        .chart-grid {
-          grid-template-columns: 1fr;
-        }
-        .chart-card {
-          height: 300px;
-        }
-        .chart-container {
-          height: 250px !important;
-        }
-        .data-table th,
-        .data-table td {
-          padding: 0.5rem;
-          font-size: 0.75rem;
-        }
-      }
+        .card { margin-bottom: 1.5rem; }
+        .result-box { background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; }
+        .ai-answer { white-space: pre-wrap; font-family: "Microsoft YaHei", sans-serif; }
+        .feature-input { transition: all 0.3s ease; }
+        .feature-input:focus { box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25); }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #0d6efd; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="navbar-logo">
-        <div class="logo-icon">Z</div>
-        <div>
-          <div class="logo-text">Z世代分析平台</div>
-          <div class="navbar-tagline">基于CSV数据的用户画像分析</div>
-        </div>
-      </div>
-    </nav>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <h1 class="text-center mb-4">Z世代用户画像与智能客群识别系统</h1>
 
-    <div class="container">
-      <div class="tab-nav">
-        <button class="tab-btn active" data-tab="portrait">
-          <i class="fas fa-chart-pie"></i> 基础画像分析
-        </button>
-        <button class="tab-btn" data-tab="predict">
-          <i class="fas fa-user-tag"></i> 细分客群识别
-        </button>
-        <button class="tab-btn" data-tab="eval">
-          <i class="fas fa-chart-line"></i> 模型评估报告
-        </button>
-        <button class="tab-btn" data-tab="ai">
-          <i class="fas fa-robot"></i> AI智能分析
-        </button>
-      </div>
-
-      <!-- 基础画像分析（核心模块） -->
-      <div class="content-card active" id="portrait">
-        <div class="content-header">
-          <h2 class="content-title">
-            <i class="fas fa-chart-pie"></i> 基础画像分析
-          </h2>
-          <p class="content-desc">
-            上传CSV数据文件，自动生成用户画像可视化图表
-          </p>
-        </div>
-
-        <!-- 文件上传区域 -->
-        <div class="file-upload" id="fileUploadArea">
-          <input type="file" id="fileInput" accept=".csv" />
-          <div class="file-upload-icon">
-            <i class="fas fa-file-csv"></i>
-          </div>
-          <div class="file-upload-text">点击或拖拽CSV文件到此处上传</div>
-          <div class="file-upload-hint">
-            支持格式: .csv，建议文件大小不超过10MB
-          </div>
-        </div>
-
-        <!-- 数据加载提示 -->
-        <div class="data-loading" id="dataLoading" style="display: none">
-          <div class="data-loading-icon">
-            <i class="fas fa-database"></i>
-          </div>
-          <div class="data-loading-text">正在解析数据...</div>
-          <div class="csv-upload-hint">请稍候，正在处理您上传的数据文件</div>
-        </div>
-
-        <!-- CSV上传状态 -->
-        <div class="csv-status" id="csvStatus">
-          <i class="fas fa-check-circle"></i>
-          <span id="csvStatusText">已成功加载数据，共 0 条记录</span>
-        </div>
-
-        <!-- 数据预览区域 -->
-        <div class="data-preview" id="dataPreview">
-          <div class="data-preview-header">
-            <h3 class="data-preview-title">
-              <i class="fas fa-table"></i> 数据预览
-            </h3>
-            <span style="color: var(--text-muted); font-size: 0.85rem"
-              >显示前10条记录</span
-            >
-          </div>
-          <div class="data-table-container">
-            <table class="data-table" id="dataTable">
-              <!-- 动态生成表格内容 -->
-            </table>
-          </div>
-        </div>
-
-        <!-- 刷新按钮 -->
-        <button
-          class="btn-secondary"
-          id="refreshPortrait"
-          style="margin-bottom: 1.5rem; display: none"
-        >
-          <i class="fas fa-sync-alt"></i> 刷新画像数据
-        </button>
-
-        <!-- 加载状态 -->
-        <div class="loading" id="portraitLoading">
-          <div class="loading-spinner"></div>
-          正在生成画像数据...
-        </div>
-
-        <!-- 图表区域（初始隐藏，加载数据后显示） -->
-        <div class="chart-grid" id="chartGrid" style="display: none">
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">
-                <i class="fas fa-calendar-alt"></i> 年龄分布
-              </h3>
-            </div>
-            <div class="chart-container" id="ageChart"></div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title"><i class="fas fa-city"></i> 城市分布</h3>
-            </div>
-            <div class="chart-container" id="cityChart"></div>
-          </div>
-
-          <div class="chart-card">
-            <div class="chart-header">
-              <h3 class="chart-title">
-                <i class="fas fa-wallet"></i> 消费特征（月均）
-              </h3>
-            </div>
-            <div class="chart-container" id="consumeChart"></div>
-          </div>
-
-          <div class="chart-card" style="grid-column: 1 / -1">
-            <div class="chart-header">
-              <h3 class="chart-title">
-                <i class="fas fa-heart"></i> APP使用偏好分布
-              </h3>
-            </div>
-            <div class="chart-container" id="interestChart"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 细分客群识别 -->
-      <div class="content-card" id="predict">
-        <div class="content-header">
-          <h2 class="content-title">
-            <i class="fas fa-user-tag"></i> Z世代客群识别
-          </h2>
-          <p class="content-desc">
-            从上传数据选择用户，识别其所属细分客群并获取运营建议
-          </p>
-        </div>
-
-        <!-- 提示信息：请先上传数据 -->
-        <div
-          id="uploadPrompt"
-          style="margin: 2rem 0; text-align: center; color: var(--text-muted)"
-        >
-          <i
-            class="fas fa-info-circle"
-            style="color: var(--primary-light); margin-right: 0.5rem"
-          ></i>
-          请先在"基础画像分析"页面上传CSV数据文件
-        </div>
-
-        <!-- 用户选择 -->
-        <div class="form-group" id="userSelectWrapper" style="display: none">
-          <label class="form-label">从上传数据选择用户</label>
-          <select class="form-input" id="userIdSelect" disabled>
-            <option value="">请等待数据加载完成...</option>
-          </select>
-        </div>
-
-        <!-- 基础属性 -->
-        <div class="category" style="display: none">
-          <i class="fas fa-user"></i> 基础属性
-        </div>
-        <div class="form-grid" id="basicAttributes" style="display: none">
-          <div class="form-group">
-            <label class="form-label">USER_ID (用户ID)</label>
-            <input
-              type="text"
-              class="form-input"
-              id="USER_ID"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">MSISDN (手机号码)</label>
-            <input
-              type="text"
-              class="form-input"
-              id="MSISDN"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">PROV (省份)</label>
-            <input
-              type="text"
-              class="form-input"
-              id="PROV"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">CITY (城市)</label>
-            <input
-              type="text"
-              class="form-input"
-              id="CITY"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">AGE (年龄)</label>
-            <input
-              type="number"
-              class="form-input"
-              id="AGE"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">INNET_DURA (入网时长)</label>
-            <input
-              type="number"
-              class="form-input"
-              id="INNET_DURA"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-        </div>
-
-        <!-- 终端与套餐信息 -->
-        <div class="category" style="display: none">
-          <i class="fas fa-mobile-alt"></i> 终端与套餐信息
-        </div>
-        <div class="form-grid" id="devicePackageInfo" style="display: none">
-          <div class="form-group">
-            <label class="form-label">TERM_BRAND (终端品牌)</label>
-            <input
-              type="text"
-              class="form-input"
-              id="TERM_BRAND"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">IS_ORD_5G_PACKAGE (是否开通5G套餐)</label>
-            <select class="form-input" id="IS_ORD_5G_PACKAGE" disabled>
-              <option value="">无数据</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">PRI_PACKAGE_FEE (主套餐费用)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="PRI_PACKAGE_FEE"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">IS_DUALSIM_USER (是否双卡用户)</label>
-            <select class="form-input" id="IS_DUALSIM_USER" disabled>
-              <option value="">无数据</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">PACKAGE_TYP (套餐类型)</label>
-            <input
-              type="text"
-              class="form-input"
-              id="PACKAGE_TYP"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >IS_TERM_CONTR_USER (是否终端合约用户)</label
-            >
-            <select class="form-input" id="IS_TERM_CONTR_USER" disabled>
-              <option value="">无数据</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 网络使用特征 -->
-        <div class="category" style="display: none">
-          <i class="fas fa-wifi"></i> 网络使用特征
-        </div>
-        <div class="form-grid" id="networkUsage" style="display: none">
-          <div class="form-group">
-            <label class="form-label">day_flux (日间流量GB)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="day_flux"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">night_flux (夜间流量GB)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="night_flux"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >L3M_AVG_23G_FLUX_RATE (2/3G流量占比)</label
-            >
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="L3M_AVG_23G_FLUX_RATE"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >L3M_AVG_FLUX_USE_CNT (近3月平均流量使用次数)</label
-            >
-            <input
-              type="number"
-              class="form-input"
-              id="L3M_AVG_FLUX_USE_CNT"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-        </div>
-
-        <!-- APP使用特征 -->
-        <div class="category" style="display: none">
-          <i class="fas fa-mobile-app"></i> APP使用特征
-        </div>
-        <div class="form-grid" id="appUsage" style="display: none">
-          <div class="form-group">
-            <label class="form-label"
-              >N3M_AVG_GAME_APP_USE_DAYS (近3月平均游戏APP使用天数)</label
-            >
-            <input
-              type="number"
-              class="form-input"
-              id="N3M_AVG_GAME_APP_USE_DAYS"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >N3M_AVG_SOCIAL_APP_USE_DAYS (近3月平均社交APP使用天数)</label
-            >
-            <input
-              type="number"
-              class="form-input"
-              id="N3M_AVG_SOCIAL_APP_USE_DAYS"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >N3M_AVG_MUSIC_APP_USE_DAYS (近3月平均音乐APP使用天数)</label
-            >
-            <input
-              type="number"
-              class="form-input"
-              id="N3M_AVG_MUSIC_APP_USE_DAYS"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >N3M_AVG_VIDEO_APP_USE_DAYS (近3月平均视频APP使用天数)</label
-            >
-            <input
-              type="number"
-              class="form-input"
-              id="N3M_AVG_VIDEO_APP_USE_DAYS"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >N3M_AVG_SHOP_APP_USE_DAYS (近3月平均购物APP使用天数)</label
-            >
-            <input
-              type="number"
-              class="form-input"
-              id="N3M_AVG_SHOP_APP_USE_DAYS"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >N3M_AVG_LEARN_APP_USE_DAYS (近3月平均学习APP使用天数)</label
-            >
-            <input
-              type="number"
-              class="form-input"
-              id="N3M_AVG_LEARN_APP_USE_DAYS"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-        </div>
-
-        <!-- 消费特征 -->
-        <div class="category" style="display: none">
-          <i class="fas fa-credit-card"></i> 消费特征
-        </div>
-        <div class="form-grid" id="consumptionFeatures" style="display: none">
-          <div class="form-group">
-            <label class="form-label">DIS_ARPU (当月ARPU值)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="DIS_ARPU"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">N3M_AVG_DIS_ARPU (近3月平均ARPU值)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="N3M_AVG_DIS_ARPU"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label">ACCT_BAL (账户余额)</label>
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="ACCT_BAL"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >L3M_AVG_VOICE_OVER_FEE (近3月平均语音超套费用)</label
-            >
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="L3M_AVG_VOICE_OVER_FEE"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >L3M_AVG_FLUX_OVER_FEE (近3月平均流量超套费用)</label
-            >
-            <input
-              type="number"
-              step="0.01"
-              class="form-input"
-              id="L3M_AVG_FLUX_OVER_FEE"
-              placeholder="无数据"
-              disabled
-            />
-          </div>
-        </div>
-
-        <!-- 位置特征 -->
-        <div class="category" style="display: none">
-          <i class="fas fa-map-marker-alt"></i> 位置特征
-        </div>
-        <div class="form-grid" id="locationFeatures" style="display: none">
-          <div class="form-group">
-            <label class="form-label"
-              >T_school_resident (当前是否校园常驻)</label
-            >
-            <select class="form-input" id="T_school_resident" disabled>
-              <option value="">无数据</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >T_company_resident (当前是否公司常驻)</label
-            >
-            <select class="form-input" id="T_company_resident" disabled>
-              <option value="">无数据</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label"
-              >T_school_night_resident (当前是否夜间校园常驻)</label
-            >
-            <select class="form-input" id="T_school_night_resident" disabled>
-              <option value="">无数据</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- 按钮组 -->
-        <div class="btn-group" id="predictionButtons" style="display: none">
-          <button class="btn-primary" id="predictBtn" disabled>
-            <i class="fas fa-search"></i> 识别客群
-          </button>
-          <button class="btn-secondary" id="resetBtn" disabled>
-            <i class="fas fa-eraser"></i> 重置表单
-          </button>
-        </div>
-
-        <!-- 加载状态 -->
-        <div class="loading" id="predictLoading">
-          <div class="loading-spinner"></div>
-          正在识别客群...
-        </div>
-
-        <!-- 预测结果 -->
-        <div class="prediction-result" id="predictionResult">
-          <!-- 动态生成结果 -->
-        </div>
-      </div>
-
-      <!-- 模型评估报告 -->
-      <div class="content-card" id="eval">
-        <div class="content-header">
-          <h2 class="content-title">
-            <i class="fas fa-chart-line"></i> 模型评估报告
-          </h2>
-          <p class="content-desc">
-            基于上传数据的用户画像模型评估指标与可视化分析
-          </p>
-        </div>
-
-        <!-- 提示信息：请先上传数据 -->
-        <div
-          id="evalUploadPrompt"
-          style="margin: 2rem 0; text-align: center; color: var(--text-muted)"
-        >
-          <i
-            class="fas fa-info-circle"
-            style="color: var(--primary-light); margin-right: 0.5rem"
-          ></i>
-          请先在"基础画像分析"页面上传CSV数据文件
-        </div>
-
-        <!-- 模型评估内容将在上传数据后显示 -->
-        <div id="evalContent" style="display: none">
-          <!-- 评估内容将动态生成 -->
-        </div>
-      </div>
-
-      <!-- AI智能分析 -->
-      <div class="content-card" id="ai">
-        <div class="content-header">
-          <h2 class="content-title"><i class="fas fa-robot"></i> AI智能分析</h2>
-          <p class="content-desc">
-            基于上传数据进行智能分析，生成Z世代用户画像洞察报告
-          </p>
-        </div>
-
-        <!-- 提示信息：请先上传数据 -->
-        <div
-          id="aiUploadPrompt"
-          style="margin: 2rem 0; text-align: center; color: var(--text-muted)"
-        >
-          <i
-            class="fas fa-info-circle"
-            style="color: var(--primary-light); margin-right: 0.5rem"
-          ></i>
-          请先在"基础画像分析"页面上传CSV数据文件
-        </div>
-
-        <!-- AI分析内容将在上传数据后显示 -->
-        <div id="aiContent" style="display: none">
-          <div class="form-group">
-            <label class="form-label">分析需求（可选）</label>
-            <textarea
-              class="ai-textarea"
-              id="analysisPrompt"
-              placeholder="请输入您想要分析的具体问题，例如：Z世代用户的消费习惯有什么特点？哪些APP最受欢迎？"
-            ></textarea>
-          </div>
-
-          <div class="btn-group">
-            <button class="btn-primary" id="generateAnalysis">
-              <i class="fas fa-magic"></i> 生成分析报告
-            </button>
-          </div>
-
-          <div class="loading" id="aiLoading">
-            <div class="loading-spinner"></div>
-            正在生成分析报告...
-          </div>
-
-          <div class="result-card" id="analysisResult">
-            <div class="result-header">
-              <div class="result-icon">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <h3 class="prediction-title">AI分析报告</h3>
-            </div>
-            <div class="ai-result-content" id="analysisContent">
-              <!-- AI分析结果将在这里显示 -->
-            </div>
-          </div>
-        </div>
-      </div>
+    <!-- 用户画像面板 -->
+    <div class="row">
+        <div class="col-md-6"><div id="ageChart" style="height:300px;"></div></div>
+        <div class="col-md-6"><div id="cityChart" style="height:300px;"></div></div>
+        <div class="col-md-6"><div id="consumeChart" style="height:300px;"></div></div>
+        <div class="col-md-6"><div id="interestChart" style="height:300px;"></div></div>
     </div>
 
-    <script>
-      // 全局变量存储CSV数据
-      let csvData = null;
-      let csvHeaders = [];
+    <!-- 客群识别（精简版，对齐model.py特征） -->
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">🔍 Z世代客群智能识别（模型特征对齐版）</div>
+        <div class="card-body">
+            <form id="predictForm" class="row g-3">
+                <!-- 基础信息 -->
+                <div class="col-md-4">
+                    <label for="AGE" class="form-label">年龄 (15-30)</label>
+                    <input type="number" class="form-control feature-input" id="AGE" min="15" max="30" placeholder="例如：22" value="22">
+                </div>
+                <div class="col-md-4">
+                    <label for="circle_num" class="form-label">社交圈人数</label>
+                    <input type="number" class="form-control feature-input" id="circle_num" placeholder="例如：15" value="15">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_DIS_ARPU" class="form-label">近3月平均ARPU (元)</label>
+                    <input type="number" step="0.1" class="form-control feature-input" id="N3M_AVG_DIS_ARPU" placeholder="例如：90.5" value="90.5">
+                </div>
 
-      // 页面加载完成后初始化
-      document.addEventListener("DOMContentLoaded", function () {
-        // 初始化标签页切换
-        initTabs();
+                <!-- 网络使用 -->
+                <div class="col-md-4">
+                    <label for="day_flux" class="form-label">日间流量 (GB)</label>
+                    <input type="number" step="0.1" class="form-control feature-input" id="day_flux" placeholder="例如：5.2" value="5.2">
+                </div>
+                <div class="col-md-4">
+                    <label for="night_flux" class="form-label">夜间流量 (GB)</label>
+                    <input type="number" step="0.1" class="form-control feature-input" id="night_flux" placeholder="例如：3.1" value="3.1">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_VOICE_SAT" class="form-label">近3月平均语音饱和度</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_VOICE_SAT" min="1" max="5" placeholder="例如：4" value="4">
+                </div>
 
-        // 初始化文件上传功能
-        initFileUpload();
+                <!-- 终端与套餐 -->
+                <div class="col-md-4">
+                    <label for="IS_ORD_5G_PACKAGE" class="form-label">是否开通5G套餐</label>
+                    <select class="form-select feature-input" id="IS_ORD_5G_PACKAGE">
+                        <option value="">请选择</option>
+                        <option value="1" selected>是</option>
+                        <option value="0">否</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="IS_DUALSIM_USER" class="form-label">是否双卡用户</label>
+                    <select class="form-select feature-input" id="IS_DUALSIM_USER">
+                        <option value="">请选择</option>
+                        <option value="1">是</option>
+                        <option value="0" selected>否</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="IS_TERM_CONTR_USER" class="form-label">是否终端合约用户</label>
+                    <select class="form-select feature-input" id="IS_TERM_CONTR_USER">
+                        <option value="">请选择</option>
+                        <option value="1">是</option>
+                        <option value="0" selected>否</option>
+                    </select>
+                </div>
 
-        // 初始化刷新按钮
-        initRefreshButton();
+                <!-- 位置特征 -->
+                <div class="col-md-4">
+                    <label for="T_school_resident" class="form-label">校园常驻 (日间)</label>
+                    <select class="form-select feature-input" id="T_school_resident">
+                        <option value="">请选择</option>
+                        <option value="1" selected>是</option>
+                        <option value="0">否</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="T_school_night_resident" class="form-label">校园常驻 (夜间)</label>
+                    <select class="form-select feature-input" id="T_school_night_resident">
+                        <option value="">请选择</option>
+                        <option value="1">是</option>
+                        <option value="0" selected>否</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="T_company_resident" class="form-label">公司常驻</label>
+                    <select class="form-select feature-input" id="T_company_resident">
+                        <option value="">请选择</option>
+                        <option value="1">是</option>
+                        <option value="0" selected>否</option>
+                    </select>
+                </div>
 
-        // 初始化用户选择和表单功能
-        initUserSelection();
+                <!-- 网游偏好 -->
+                <div class="col-md-4">
+                    <label for="N3M_AVG_GAME_APP_USE_DAYS" class="form-label">近三月游戏APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_GAME_APP_USE_DAYS" placeholder="0-90" value="20">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_GAME_APP_USE_CNT" class="form-label">近三月游戏APP使用次数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_GAME_APP_USE_CNT" placeholder="总次数" value="500">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_GAME_APP_USE_DURA" class="form-label">近三月游戏APP平均使用流量</label>
+                    <input type="number" step="0.1" class="form-control feature-input" id="N3M_AVG_GAME_APP_USE_DURA" placeholder="总时长" value="15.5">
+                </div>
 
-        // 初始化预测按钮
-        initPredictButton();
+                <!-- 学习偏好 -->
+                <div class="col-md-4">
+                    <label for="N3M_AVG_LEARN_APP_USE_DAYS" class="form-label">近三月学习APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_LEARN_APP_USE_DAYS" placeholder="0-90" value="10">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_LEARN_APP_USE_CNT" class="form-label">近三月学习APP使用次数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_LEARN_APP_USE_CNT" placeholder="总次数" value="200">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_LEARN_APP_USE_DURA" class="form-label">近三月学习APP平均使用流量</label>
+                    <input type="number" step="0.1" class="form-control feature-input" id="N3M_AVG_LEARN_APP_USE_DURA" placeholder="总时长" value="5.0">
+                </div>
 
-        // 初始化重置按钮
-        initResetButton();
+                <!-- 金融偏好 -->
+                <div class="col-md-4">
+                    <label for="N3M_AVG_BNK_APP_USE_DAYS" class="form-label">近三月银行APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_BNK_APP_USE_DAYS" placeholder="0-90" value="2">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_FINANC_APP_USE_DAYS" class="form-label">近三月金融APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_FINANC_APP_USE_DAYS" placeholder="0-90" value="1">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_ACCNT_APP_USE_DAYS" class="form-label">近三月账户类APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_ACCNT_APP_USE_DAYS" placeholder="0-90" value="3">
+                </div>
 
-        // 初始化AI分析按钮
-        initAiAnalysisButton();
-      });
+                <!-- 工作偏好 -->
+                <div class="col-md-6">
+                    <label for="N3M_AVG_OFFICE_APP_USE_DAYS" class="form-label">近三月办公APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_OFFICE_APP_USE_DAYS" placeholder="0-90" value="5">
+                </div>
+                <div class="col-md-6">
+                    <label for="N3M_AVG_EMAIL_APP_USE_DAYS" class="form-label">近三月邮件APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_EMAIL_APP_USE_DAYS" placeholder="0-90" value="3">
+                </div>
 
-      // 初始化标签页切换
-      function initTabs() {
-        const tabBtns = document.querySelectorAll(".tab-btn");
-        const contentCards = document.querySelectorAll(".content-card");
+                <!-- 社交偏好 -->
+                <div class="col-md-6">
+                    <label for="N3M_AVG_SOCIAL_APP_USE_DAYS" class="form-label">近三月社交APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_SOCIAL_APP_USE_DAYS" placeholder="0-90" value="25">
+                </div>
+                <div class="col-md-6">
+                    <label for="N3M_AVG_SOCIAL_APP_USE_CNT" class="form-label">近三月社交APP使用次数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_SOCIAL_APP_USE_CNT" placeholder="总次数" value="800">
+                </div>
 
-        tabBtns.forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const tabId = btn.getAttribute("data-tab");
+                <!-- 阅读偏好 -->
+                <div class="col-md-4">
+                    <label for="N3M_AVG_READ_APP_USE_DAYS" class="form-label">近三月阅读APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_READ_APP_USE_DAYS" placeholder="0-90" value="8">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_READ_APP_USE_CNT" class="form-label">近三月阅读APP使用次数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_READ_APP_USE_CNT" placeholder="总次数" value="150">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_READ_APP_USE_DURA" class="form-label">近三月阅读APP平均使用流量</label>
+                    <input type="number" step="0.1" class="form-control feature-input" id="N3M_AVG_READ_APP_USE_DURA" placeholder="总时长" value="4.2">
+                </div>
 
-            // 更新按钮状态
-            tabBtns.forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
+                <!-- 音乐偏好 -->
+                <div class="col-md-4">
+                    <label for="N3M_AVG_MUSIC_APP_USE_DAYS" class="form-label">近三月音乐APP使用天数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_MUSIC_APP_USE_DAYS" placeholder="0-90" value="18">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_MUSIC_APP_USE_CNT" class="form-label">近三月音乐APP使用次数</label>
+                    <input type="number" class="form-control feature-input" id="N3M_AVG_MUSIC_APP_USE_CNT" placeholder="总次数" value="600">
+                </div>
+                <div class="col-md-4">
+                    <label for="N3M_AVG_MUSIC_APP_USE_DURA" class="form-label">近三月音乐APP平均使用流量</label>
+                    <input type="number" step="0.1" class="form-control feature-input" id="N3M_AVG_MUSIC_APP_USE_DURA" placeholder="总时长" value="12.0">
+                </div>
 
-            // 更新内容卡片状态
-            contentCards.forEach((card) => card.classList.remove("active"));
-            document.getElementById(tabId).classList.add("active");
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success" id="predictBtn">
+                        <span id="predictBtnText">识别Z世代客群</span>
+                        <span id="predictSpinner" class="d-none"><span class="loading"></span> 识别中...</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="randomBtn">随机生成样本</button>
+                </div>
+            </form>
+            <div id="predictResult" class="result-box d-none"></div>
+        </div>
+    </div>
 
-            // 如果切换到其他标签页且已有数据，显示相应内容
-            if (csvData && tabId === "predict") {
-              showPredictContent();
-            } else if (csvData && tabId === "eval") {
-              showEvalContent();
-            } else if (csvData && tabId === "ai") {
-              showAiContent();
-            }
-          });
-        });
-      }
+    <!-- 模型评估 -->
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">📊 模型评估报告</div>
+        <div class="card-body">
+            <div id="evalMetrics"></div>
+            <table class="table table-striped mt-3">
+                <thead><tr><th>客群</th><th>精确率</th><th>召回率</th><th>F1值</th><th>样本数</th></tr></thead>
+                <tbody id="groupMetricsBody"></tbody>
+            </table>
+            <p id="evalConclusion" class="mt-2"></p>
+        </div>
+    </div>
 
-      // 初始化文件上传功能
-      function initFileUpload() {
-        const fileInput = document.getElementById("fileInput");
-        const fileUploadArea = document.getElementById("fileUploadArea");
-        const dataLoading = document.getElementById("dataLoading");
-        const csvStatus = document.getElementById("csvStatus");
-        const csvStatusText = document.getElementById("csvStatusText");
+    <!-- AI 智能分析 -->
+    <div class="card mt-4">
+        <div class="card-header bg-warning text-dark">🤖 AI 智能分析助手</div>
+        <div class="card-body">
+            <div class="mb-2">
+                <label for="aiQueryInput" class="form-label">请输入您的分析问题：</label>
+                <input type="text" class="form-control" id="aiQueryInput" placeholder="例如：分析网游偏好客群的核心特征">
+            </div>
+            <button id="aiAnalyzeBtn" class="btn btn-outline-secondary">
+                <span id="aiBtnText">获取AI分析</span>
+                <span id="aiSpinner" class="d-none"><span class="loading"></span> 分析中...</span>
+            </button>
+            <div id="aiAnswer" class="result-box ai-answer mt-2 d-none"></div>
+        </div>
+    </div>
+</div>
 
-        // 点击上传区域触发文件选择
-        fileUploadArea.addEventListener("click", () => {
-          fileInput.click();
-        });
-
-        // 拖拽功能
-        fileUploadArea.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          fileUploadArea.style.borderColor = javascript(--primary - light);
-          fileUploadArea.style.background = "rgba(30, 41, 59, 0.8)";
-        });
-
-        fileUploadArea.addEventListener("dragleave", () => {
-          fileUploadArea.style.borderColor = "rgba(99, 102, 241, 0.3)";
-          fileUploadArea.style.background = "rgba(30, 41, 59, 0.6)";
-        });
-
-        fileUploadArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          fileUploadArea.style.borderColor = "rgba(99, 102, 241, 0.3)";
-          fileUploadArea.style.background = "rgba(30, 41, 59, 0.6)";
-
-          if (e.dataTransfer.files.length) {
-            fileInput.files = e.dataTransfer.files;
-            handleFileUpload();
-          }
-        });
-
-        // 文件选择后处理
-        fileInput.addEventListener("change", handleFileUpload);
-
-        // 处理文件上传
-        function handleFileUpload() {
-          const file = fileInput.files[0];
-          if (!file) return;
-
-          // 验证文件类型
-          if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
-            alert("请上传CSV格式的文件");
-            return;
-          }
-
-          // 显示加载状态
-          dataLoading.style.display = "block";
-          fileUploadArea.style.display = "none";
-          csvStatus.classList.remove("active");
-
-          // 使用PapaParse解析CSV
-          Papa.parse(file, {
-            header: true,
-            dynamicTyping: true,
-            complete: function (results) {
-              // 存储解析后的数据
-              csvData = results.data;
-              csvHeaders = results.meta.fields;
-
-              // 隐藏加载状态
-              dataLoading.style.display = "none";
-
-              // 显示上传状态
-              csvStatusText.textContent = `已成功加载数据，共 ${csvData.length} 条记录`;
-              csvStatus.classList.add("active");
-
-              // 显示数据预览
-              displayDataPreview();
-
-              // 显示刷新按钮
-              document.getElementById("refreshPortrait").style.display =
-                "block";
-
-              // 生成图表
-              generateCharts();
-
-              // 更新其他标签页状态
-              updateOtherTabs();
-            },
-            error: function (error) {
-              dataLoading.style.display = "none";
-              alert(`解析CSV文件时出错: ${error.message}`);
-              fileUploadArea.style.display = "block";
-            },
-          });
-        }
-      }
-
-      // 显示数据预览
-      function displayDataPreview() {
-        const dataTable = document.getElementById("dataTable");
-        const dataPreview = document.getElementById("dataPreview");
-
-        // 清空表格
-        dataTable.innerHTML = "";
-
-        // 限制显示的列数，避免表格过宽
-        const displayHeaders = csvHeaders.slice(0, 8); // 只显示前8列
-
-        // 创建表头
-        const thead = document.createElement("thead");
-        const headerRow = document.createElement("tr");
-
-        displayHeaders.forEach((header) => {
-          const th = document.createElement("th");
-          th.textContent = header;
-          headerRow.appendChild(th);
-        });
-
-        thead.appendChild(headerRow);
-        dataTable.appendChild(thead);
-
-        // 创建表格内容（最多显示10行）
-        const tbody = document.createElement("tbody");
-        const displayRows = Math.min(10, csvData.length);
-
-        for (let i = 0; i < displayRows; i++) {
-          const row = document.createElement("tr");
-          const dataRow = csvData[i];
-
-          displayHeaders.forEach((header) => {
-            const td = document.createElement("td");
-            td.textContent =
-              dataRow[header] !== undefined ? dataRow[header] : "";
-            row.appendChild(td);
-          });
-
-          tbody.appendChild(row);
-        }
-
-        dataTable.appendChild(tbody);
-
-        // 显示数据预览
-        dataPreview.classList.add("active");
-      }
-
-      // 初始化刷新按钮
-      function initRefreshButton() {
-        const refreshBtn = document.getElementById("refreshPortrait");
-
-        refreshBtn.addEventListener("click", function () {
-          const chartGrid = document.getElementById("chartGrid");
-          const portraitLoading = document.getElementById("portraitLoading");
-
-          // 隐藏图表，显示加载状态
-          chartGrid.style.display = "none";
-          portraitLoading.classList.add("active");
-
-          // 延迟一段时间后重新生成图表，模拟加载过程
-          setTimeout(() => {
-            generateCharts();
-            portraitLoading.classList.remove("active");
-          }, 800);
-        });
-      }
-
-      // 生成图表
-      function generateCharts() {
-        if (!csvData || csvData.length === 0) return;
-
-        // 显示图表区域
-        const chartGrid = document.getElementById("chartGrid");
-        chartGrid.style.display = "grid";
-
-        // 生成年龄分布图表
-        generateAgeChart();
-
-        // 生成城市分布图表
-        generateCityChart();
-
-        // 生成消费特征图表
-        generateConsumeChart();
-
-        // 生成APP使用偏好图表
-        generateInterestChart();
-      }
-
-      // 生成年龄分布图表
-      function generateAgeChart() {
-        const ageChart = echarts.init(document.getElementById("ageChart"));
-
-        // 处理年龄数据
-        const ageGroups = {
-          "18岁以下": 0,
-          "18-22岁": 0,
-          "23-26岁": 0,
-          "27-30岁": 0,
-          "30岁以上": 0,
-        };
-
-        csvData.forEach((user) => {
-          const age = user.AGE;
-          if (age === undefined) return;
-
-          if (age < 18) {
-            ageGroups["18岁以下"]++;
-          } else if (age >= 18 && age <= 22) {
-            ageGroups["18-22岁"]++;
-          } else if (age >= 23 && age <= 26) {
-            ageGroups["23-26岁"]++;
-          } else if (age >= 27 && age <= 30) {
-            ageGroups["27-30岁"]++;
-          } else {
-            ageGroups["30岁以上"]++;
-          }
-        });
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "item",
-          },
-          legend: {
-            top: "5%",
-            left: "center",
-            textStyle: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "年龄分布",
-              type: "pie",
-              radius: ["40%", "70%"],
-              avoidLabelOverlap: false,
-              itemStyle: {
-                borderRadius: 10,
-                borderColor: "#1e293b",
-                borderWidth: 2,
-              },
-              label: {
-                show: false,
-                position: "center",
-              },
-              emphasis: {
-                label: {
-                  show: true,
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  color: "#fff",
-                },
-              },
-              labelLine: {
-                show: false,
-              },
-              data: Object.entries(ageGroups).map(([name, value]) => ({
-                name,
-                value,
+<script>
+// === 新增：兴趣偏好专用渲染函数（横向条形图）===
+function renderInterestChart(containerId, data, title) {
+    const chart = echarts.init(document.getElementById(containerId));
+    const option = {
+        title: {
+            text: title,
+            left: 'center',
+            textStyle: { fontSize: 14 }
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' }
+        },
+        xAxis: {
+            type: 'value',
+            name: '天数',
+            axisLabel: { formatter: '{value}' }
+        },
+        yAxis: {
+            type: 'category',
+            data: data.map(item => item.name),
+            axisLabel: { interval: 0 }
+        },
+        series: [{
+            type: 'bar',
+            data: data.map(item => ({
+                value: item.value,
                 itemStyle: {
-                  color: getColorByIndex(Object.keys(ageGroups).indexOf(name)),
-                },
-              })),
-            },
-          ],
-        };
-
-        ageChart.setOption(option);
-
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          ageChart.resize();
-        });
-      }
-
-      // 生成城市分布图表
-      function generateCityChart() {
-        const cityChart = echarts.init(document.getElementById("cityChart"));
-
-        // 处理城市数据，只取前10个城市
-        const cityCounts = {};
-        csvData.forEach((user) => {
-          const city = user.CITY;
-          if (city && city !== "未知") {
-            cityCounts[city] = (cityCounts[city] || 0) + 1;
-          }
-        });
-
-        // 排序并取前10
-        const topCities = Object.entries(cityCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 10);
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "axis",
-            axisPointer: {
-              type: "shadow",
-            },
-          },
-          grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-          },
-          xAxis: {
-            type: "value",
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          yAxis: {
-            type: "category",
-            data: topCities.map((item) => item[0]),
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "用户数量",
-              type: "bar",
-              data: topCities.map((item) => item[1]),
-              itemStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-                  { offset: 0, color: "#6366f1" },
-                  { offset: 1, color: "#818cf8" },
-                ]),
-              },
-              emphasis: {
-                itemStyle: {
-                  color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-                    { offset: 0, color: "#818cf8" },
-                    { offset: 1, color: "#6366f1" },
-                  ]),
-                },
-              },
-            },
-          ],
-        };
-
-        cityChart.setOption(option);
-
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          cityChart.resize();
-        });
-      }
-
-      // 生成消费特征图表
-      function generateConsumeChart() {
-        const consumeChart = echarts.init(
-          document.getElementById("consumeChart")
-        );
-
-        // 处理消费数据
-        const arpuData = csvData
-          .filter(
-            (user) =>
-              user.N3M_AVG_DIS_ARPU !== undefined && user.N3M_AVG_DIS_ARPU > 0
-          )
-          .map((user) => user.N3M_AVG_DIS_ARPU)
-          .slice(0, 20); // 取前20条数据
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "axis",
-            axisPointer: {
-              type: "shadow",
-            },
-            formatter: "{b}: {c} 元",
-          },
-          grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-          },
-          xAxis: {
-            type: "category",
-            data: arpuData.map((_, index) => `用户${index + 1}`),
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-              rotate: 45,
-            },
-          },
-          yAxis: {
-            type: "value",
-            name: "月均消费 (元)",
-            nameTextStyle: {
-              color: "#e2e8f0",
-            },
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-              formatter: "{value} 元",
-            },
-          },
-          series: [
-            {
-              name: "月均ARPU值",
-              type: "bar",
-              data: arpuData,
-              itemStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  { offset: 0, color: "#ec4899" },
-                  { offset: 1, color: "#f472b6" },
-                ]),
-              },
-            },
-          ],
-        };
-
-        consumeChart.setOption(option);
-
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          consumeChart.resize();
-        });
-      }
-
-      // 生成APP使用偏好图表
-      function generateInterestChart() {
-        const interestChart = echarts.init(
-          document.getElementById("interestChart")
-        );
-
-        // 处理APP使用数据
-        const appCategories = [
-          { name: "游戏", field: "N3M_AVG_GAME_APP_USE_DAYS" },
-          { name: "社交", field: "N3M_AVG_SOCIAL_APP_USE_DAYS" },
-          { name: "音乐", field: "N3M_AVG_MUSIC_APP_USE_DAYS" },
-          { name: "视频", field: "N3M_AVG_VIDEO_APP_USE_DAYS" },
-          { name: "购物", field: "N3M_AVG_SHOP_APP_USE_DAYS" },
-          { name: "学习", field: "N3M_AVG_LEARN_APP_USE_DAYS" },
-          { name: "阅读", field: "N3M_AVG_READ_APP_USE_DAYS" },
-          { name: "办公", field: "N3M_AVG_OFFICE_APP_USE_DAYS" },
-        ];
-
-        // 计算每个类别的平均使用天数
-        const appAverages = appCategories.map((category) => {
-          let total = 0;
-          let count = 0;
-
-          csvData.forEach((user) => {
-            if (
-              user[category.field] !== undefined &&
-              !isNaN(user[category.field])
-            ) {
-              total += user[category.field];
-              count++;
+                    color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                        { offset: 0, color: '#5470c6' },
+                        { offset: 1, color: '#91cc75' }
+                    ])
+                }
+            })),
+            label: {
+                show: true,
+                position: 'right',
+                formatter: '{c} 天'
             }
-          });
-
-          return {
-            name: category.name,
-            average: count > 0 ? (total / count).toFixed(1) : 0,
-          };
-        });
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "axis",
-            axisPointer: {
-              type: "shadow",
-            },
-            formatter: "{b}: {c} 天/月",
-          },
-          legend: {
-            data: ["平均使用天数"],
-            textStyle: {
-              color: "#e2e8f0",
-            },
-          },
-          grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-          },
-          xAxis: {
-            type: "category",
-            data: appAverages.map((item) => item.name),
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          yAxis: {
-            type: "value",
-            name: "平均使用天数/月",
-            nameTextStyle: {
-              color: "#e2e8f0",
-            },
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "平均使用天数",
-              type: "bar",
-              barWidth: "60%",
-              data: appAverages.map((item) => parseFloat(item.average)),
-              itemStyle: {
-                color: function (params) {
-                  return getColorByIndex(params.dataIndex);
-                },
-              },
-            },
-          ],
-        };
-
-        interestChart.setOption(option);
-
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          interestChart.resize();
-        });
-      }
-
-      // 更新其他标签页状态
-      function updateOtherTabs() {
-        // 如果当前激活的是预测标签页，显示预测内容
-        if (document.getElementById("predict").classList.contains("active")) {
-          showPredictContent();
+        }],
+        grid: {
+            left: '10%',
+            right: '20%',
+            top: '15%',
+            bottom: '15%'
         }
+    };
+    chart.setOption(option);
+    window.addEventListener('resize', () => chart.resize());
+}
 
-        // 如果当前激活的是模型评估标签页，显示评估内容
-        if (document.getElementById("eval").classList.contains("active")) {
-          showEvalContent();
-        }
+// 加载画像数据（已更新 interestChart 渲染逻辑）
+function loadPortraitData() {
+    fetch('/get_portrait_data')
+        .then(res => {
+            if (!res.ok) throw new Error('网络响应错误');
+            return res.json();
+        })
+        .then(data => {
+            renderChart('ageChart', data.data.age_dist, '年龄分布', 'pie');
+            renderChart('cityChart', data.data.city_dist, '地域分布', 'bar');
+            renderChart('consumeChart', data.data.consume_feat, '消费分布', 'pie');
 
-        // 如果当前激活的是AI分析标签页，显示AI内容
-        if (document.getElementById("ai").classList.contains("active")) {
-          showAiContent();
-        }
-      }
+           
+           // === 构造兴趣数据（直接使用后端返回的语义化标签）===
+         const interestData = (data.data.interest_feat || [])
+             .filter(item => item.value > 0)
+             .sort((a, b) => b.value - a.value);
 
-      // 显示预测内容
-      function showPredictContent() {
-        const uploadPrompt = document.getElementById("uploadPrompt");
-        const userSelectWrapper = document.getElementById("userSelectWrapper");
-        const userIdSelect = document.getElementById("userIdSelect");
-
-        // 隐藏提示信息，显示用户选择
-        uploadPrompt.style.display = "none";
-        userSelectWrapper.style.display = "block";
-
-        // 显示各个属性分组
-        document.querySelectorAll(".category").forEach((el) => {
-          el.style.display = "flex";
+            renderInterestChart('interestChart', interestData, 'Z世代兴趣偏好（近3月平均使用天数）');
+        })
+        .catch(error => {
+            console.error('加载画像数据失败:', error);
+            document.getElementById('ageChart').innerHTML = '<div class="text-center p-5 text-muted">数据加载失败</div>';
+            document.getElementById('cityChart').innerHTML = '<div class="text-center p-5 text-muted">数据加载失败</div>';
+            document.getElementById('consumeChart').innerHTML = '<div class="text-center p-5 text-muted">数据加载失败</div>';
+            document.getElementById('interestChart').innerHTML = '<div class="text-center p-5 text-muted">兴趣数据加载失败</div>';
         });
-        document.getElementById("basicAttributes").style.display = "grid";
-        document.getElementById("devicePackageInfo").style.display = "grid";
-        document.getElementById("networkUsage").style.display = "grid";
-        document.getElementById("appUsage").style.display = "grid";
-        document.getElementById("consumptionFeatures").style.display = "grid";
-        document.getElementById("locationFeatures").style.display = "grid";
-        document.getElementById("predictionButtons").style.display = "flex";
+}
 
-        // 填充用户选择下拉框
-        userIdSelect.innerHTML = "";
-        const defaultOption = document.createElement("option");
-        defaultOption.value = "";
-        defaultOption.textContent = "请选择用户";
-        userIdSelect.appendChild(defaultOption);
-
-        csvData.forEach((user, index) => {
-          if (user.USER_ID) {
-            const option = document.createElement("option");
-            option.value = index; // 使用索引作为值
-            option.textContent = `用户 ${user.USER_ID} (${
-              user.CITY || "未知城市"
-            })`;
-            userIdSelect.appendChild(option);
-          }
-        });
-
-        // 启用下拉框和按钮
-        userIdSelect.disabled = false;
-        document.getElementById("resetBtn").disabled = false;
-      }
-
-      // 初始化用户选择功能
-      function initUserSelection() {
-        const userIdSelect = document.getElementById("userIdSelect");
-
-        userIdSelect.addEventListener("change", function () {
-          const selectedIndex = this.value;
-          if (!selectedIndex) return;
-
-          const selectedUser = csvData[selectedIndex];
-          if (!selectedUser) return;
-
-          // 填充表单数据
-          fillUserForm(selectedUser);
-
-          // 启用预测按钮
-          document.getElementById("predictBtn").disabled = false;
-
-          // 隐藏之前的预测结果
-          document
-            .getElementById("predictionResult")
-            .classList.remove("active");
-        });
-      }
-
-      // 填充用户表单数据
-      function fillUserForm(user) {
-        // 基础属性
-        document.getElementById("USER_ID").value = user.USER_ID || "";
-        document.getElementById("MSISDN").value = user.MSISDN || "";
-        document.getElementById("PROV").value = user.PROV || "";
-        document.getElementById("CITY").value = user.CITY || "";
-        document.getElementById("AGE").value = user.AGE || "";
-        document.getElementById("INNET_DURA").value = user.INNET_DURA || "";
-
-        // 终端与套餐信息
-        document.getElementById("TERM_BRAND").value = user.TERM_BRAND || "";
-        setSelectValue("IS_ORD_5G_PACKAGE", user.IS_ORD_5G_PACKAGE);
-        document.getElementById("PRI_PACKAGE_FEE").value =
-          user.PRI_PACKAGE_FEE || "";
-        setSelectValue("IS_DUALSIM_USER", user.IS_DUALSIM_USER);
-        document.getElementById("PACKAGE_TYP").value = user.PACKAGE_TYP || "";
-        setSelectValue("IS_TERM_CONTR_USER", user.IS_TERM_CONTR_USER);
-
-        // 网络使用特征
-        document.getElementById("day_flux").value = user.day_flux || "";
-        document.getElementById("night_flux").value = user.night_flux || "";
-        document.getElementById("L3M_AVG_23G_FLUX_RATE").value =
-          user.L3M_AVG_23G_FLUX_RATE || "";
-        document.getElementById("L3M_AVG_FLUX_USE_CNT").value =
-          user.L3M_AVG_FLUX_USE_CNT || "";
-
-        // APP使用特征
-        document.getElementById("N3M_AVG_GAME_APP_USE_DAYS").value =
-          user.N3M_AVG_GAME_APP_USE_DAYS || "";
-        document.getElementById("N3M_AVG_SOCIAL_APP_USE_DAYS").value =
-          user.N3M_AVG_SOCIAL_APP_USE_DAYS || "";
-        document.getElementById("N3M_AVG_MUSIC_APP_USE_DAYS").value =
-          user.N3M_AVG_MUSIC_APP_USE_DAYS || "";
-        document.getElementById("N3M_AVG_VIDEO_APP_USE_DAYS").value =
-          user.N3M_AVG_VIDEO_APP_USE_DAYS || "";
-        document.getElementById("N3M_AVG_SHOP_APP_USE_DAYS").value =
-          user.N3M_AVG_SHOP_APP_USE_DAYS || "";
-        document.getElementById("N3M_AVG_LEARN_APP_USE_DAYS").value =
-          user.N3M_AVG_LEARN_APP_USE_DAYS || "";
-
-        // 消费特征
-        document.getElementById("DIS_ARPU").value = user.DIS_ARPU || "";
-        document.getElementById("N3M_AVG_DIS_ARPU").value =
-          user.N3M_AVG_DIS_ARPU || "";
-        document.getElementById("ACCT_BAL").value = user.ACCT_BAL || "";
-        document.getElementById("L3M_AVG_VOICE_OVER_FEE").value =
-          user.L3M_AVG_VOICE_OVER_FEE || "";
-        document.getElementById("L3M_AVG_FLUX_OVER_FEE").value =
-          user.L3M_AVG_FLUX_OVER_FEE || "";
-
-        // 位置特征
-        setSelectValue("T_school_resident", user.T_school_resident);
-        setSelectValue("T_company_resident", user.T_company_resident);
-        setSelectValue("T_school_night_resident", user.T_school_night_resident);
-      }
-
-      // 设置下拉框值
-      function setSelectValue(elementId, value) {
-        const select = document.getElementById(elementId);
-        select.innerHTML = "";
-
-        // 添加空选项
-        const emptyOption = document.createElement("option");
-        emptyOption.value = "";
-        emptyOption.textContent = "未知";
-        select.appendChild(emptyOption);
-
-        // 添加是/否选项
-        const yesOption = document.createElement("option");
-        yesOption.value = "1";
-        yesOption.textContent = "是";
-        select.appendChild(yesOption);
-
-        const noOption = document.createElement("option");
-        noOption.value = "0";
-        noOption.textContent = "否";
-        select.appendChild(noOption);
-
-        // 设置选中值
-        if (value !== undefined && value !== null) {
-          select.value = value.toString();
-        }
-      }
-
-      // 初始化预测按钮
-      function initPredictButton() {
-        const predictBtn = document.getElementById("predictBtn");
-        const predictLoading = document.getElementById("predictLoading");
-        const predictionResult = document.getElementById("predictionResult");
-
-        predictBtn.addEventListener("click", function () {
-          const selectedIndex = document.getElementById("userIdSelect").value;
-          if (!selectedIndex) return;
-
-          const selectedUser = csvData[selectedIndex];
-          if (!selectedUser) return;
-
-          // 显示加载状态
-          predictLoading.classList.add("active");
-          predictionResult.classList.remove("active");
-
-          // 模拟预测过程
-          setTimeout(() => {
-            // 生成预测结果
-            generatePredictionResult(selectedUser);
-
-            // 隐藏加载状态，显示结果
-            predictLoading.classList.remove("active");
-            predictionResult.classList.add("active");
-          }, 1500);
-        });
-      }
-
-      // 生成预测结果
-      function generatePredictionResult(user) {
-        const predictionResult = document.getElementById("predictionResult");
-
-        // 基于用户数据确定客群类型
-        let userType = "";
-        let confidence = 0;
-        let description = "";
-        let recommendations = [];
-
-        // 简单的客群分类逻辑
-        if (user.AGE < 22 && user.N3M_AVG_GAME_APP_USE_DAYS > 15) {
-          userType = "游戏娱乐型";
-          confidence = 85 + Math.random() * 10;
-          description =
-            "该用户属于游戏娱乐型Z世代用户，年龄较轻，游戏APP使用频率高，对新鲜事物接受度高，倾向于沉浸式娱乐体验。";
-          recommendations = [
-            "推荐高流量游戏套餐，满足其游戏需求",
-            "可推送热门游戏资讯和新游上线信息",
-            "考虑与游戏平台合作推出联合会员",
-          ];
-        } else if (
-          user.N3M_AVG_SOCIAL_APP_USE_DAYS > 20 &&
-          user.N3M_AVG_VIDEO_APP_USE_DAYS > 15
-        ) {
-          userType = "社交娱乐型";
-          confidence = 80 + Math.random() * 10;
-          description =
-            "该用户属于社交娱乐型Z世代用户，频繁使用社交和视频类APP，注重社交互动和内容消费，是流行文化的积极参与者。";
-          recommendations = [
-            "推荐包含社交平台专属流量包的套餐",
-            "可推送热门影视、综艺资讯",
-            "考虑与短视频平台合作推出专属权益",
-          ];
-        } else if (
-          user.N3M_AVG_LEARN_APP_USE_DAYS > 10 &&
-          user.T_school_resident === "1"
-        ) {
-          userType = "学习进取型";
-          confidence = 78 + Math.random() * 10;
-          description =
-            "该用户属于学习进取型Z世代用户，有较高的学习意愿，可能是在校学生，注重自我提升和知识获取。";
-          recommendations = [
-            "推荐校园专属套餐和学习类APP会员",
-            "可推送在线课程优惠信息",
-            "考虑与教育平台合作推出学生权益",
-          ];
-        } else if (user.N3M_AVG_SHOP_APP_USE_DAYS > 15 && user.DIS_ARPU > 100) {
-          userType = "消费活跃型";
-          confidence = 82 + Math.random() * 10;
-          description =
-            "该用户属于消费活跃型Z世代用户，购物APP使用频繁，消费能力较强，对电商活动和优惠信息敏感度高。";
-          recommendations = [
-            "推荐包含购物返现或积分的套餐",
-            "可推送电商平台优惠活动信息",
-            "考虑与主流电商平台合作推出联合会员",
-          ];
-        } else {
-          userType = "综合均衡型";
-          confidence = 75 + Math.random() * 10;
-          description =
-            "该用户属于综合均衡型Z世代用户，各项APP使用较为均衡，没有特别突出的偏好，需求多样化。";
-          recommendations = [
-            "推荐性价比高的综合套餐",
-            "可根据季节和节日推送多元化内容",
-            "考虑提供灵活的套餐组合选择",
-          ];
-        }
-
-        // 构建结果HTML
-        predictionResult.innerHTML = `
-          <div class="prediction-header">
-            <h3 class="prediction-title">
-              客群识别结果
-              <span class="prediction-badge">匹配度 ${confidence.toFixed(
-                1
-              )}%</span>
-            </h3>
-          </div>
-          <div class="result-content">
-            <div class="result-metric">
-              <div class="metric-label">用户ID</div>
-              <div class="metric-value">${user.USER_ID || "未知"}</div>
-            </div>
-            <div class="result-metric">
-              <div class="metric-label">识别客群</div>
-              <div class="metric-value highlight">${userType}</div>
-            </div>
-            <div class="result-metric">
-              <div class="metric-label">客群描述</div>
-              <div class="metric-value">${description}</div>
-            </div>
-            <div class="result-metric">
-              <div class="metric-label">运营建议</div>
-              <ul class="recommendation-list">
-                ${recommendations.map((rec) => `<li>${rec}</li>`).join("")}
-              </ul>
-            </div>
-          </div>
-        `;
-      }
-
-      // 初始化重置按钮
-      function initResetButton() {
-        const resetBtn = document.getElementById("resetBtn");
-
-        resetBtn.addEventListener("click", function () {
-          // 重置下拉框
-          document.getElementById("userIdSelect").value = "";
-
-          // 清空表单
-          document.querySelectorAll(".form-input").forEach((input) => {
-            if (input.tagName === "INPUT") {
-              input.value = "";
-            } else if (input.tagName === "SELECT") {
-              input.value = "";
+// 通用图表渲染（用于 age/city/consume）
+function renderChart(containerId, data, title, type) {
+    const chart = echarts.init(document.getElementById(containerId));
+    const option = {
+        title: { text: title, left: 'center', textStyle: { fontSize: 14 } },
+        tooltip: {
+            trigger: 'item',
+            formatter: function(params) {
+                if (type === 'bar') {
+                    return `${params.name}: ${params.value}`;
+                } else {
+                    return `${params.name}: ${(params.percent || 0).toFixed(1)}%`;
+                }
             }
-          });
+        },
+        legend: { bottom: 0 },
+        series: [{
+            type: type,
+            data: data,
+            label: { show: type === 'bar' },
+            emphasis: { focus: 'series' },
+            radius: type === 'pie' ? ['40%', '70%'] : undefined,
+            itemStyle: { borderRadius: 4 }
+        }]
+    };
 
-          // 禁用预测按钮
-          document.getElementById("predictBtn").disabled = true;
-
-          // 隐藏预测结果
-          document
-            .getElementById("predictionResult")
-            .classList.remove("active");
-        });
-      }
-
-      // 显示评估内容
-      function showEvalContent() {
-        const evalUploadPrompt = document.getElementById("evalUploadPrompt");
-        const evalContent = document.getElementById("evalContent");
-
-        // 隐藏提示信息，显示评估内容
-        evalUploadPrompt.style.display = "none";
-        evalContent.style.display = "block";
-
-        // 生成评估报告
-        generateEvalReport();
-      }
-
-      // 生成评估报告
-      function generateEvalReport() {
-        const evalContent = document.getElementById("evalContent");
-
-        // 简单的评估指标计算
-        const totalUsers = csvData.length;
-        const ageDistribution = calculateAgeDistribution();
-        const cityCount = new Set(
-          csvData.map((user) => user.CITY).filter(Boolean)
-        ).size;
-        const avgARPU = calculateAverage("N3M_AVG_DIS_ARPU");
-        const fiveGAdoptionRate = calculateRate("IS_ORD_5G_PACKAGE", "1");
-        const dualSimRate = calculateRate("IS_DUALSIM_USER", "1");
-        const schoolResidentRate = calculateRate("T_school_resident", "1");
-
-        // 构建评估报告HTML
-        evalContent.innerHTML = `
-          <div class="eval-report-card">
-            <div class="eval-header">
-              <h3 class="eval-title">数据概览</h3>
-            </div>
-            <div class="eval-metrics">
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">总用户数</div>
-                <div class="eval-metric-value">${totalUsers}</div>
-              </div>
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">覆盖城市数</div>
-                <div class="eval-metric-value">${cityCount}</div>
-              </div>
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">平均ARPU值(元)</div>
-                <div class="eval-metric-value">${avgARPU.toFixed(2)}</div>
-              </div>
-              <div class="eval-metric-item">
-                <div class="eval-metric-label">5G套餐渗透率</div>
-                <div class="eval-metric-value">${fiveGAdoptionRate.toFixed(
-                  1
-                )}%</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="chart-grid" style="margin-top: 2rem;">
-            <div class="chart-card">
-              <div class="chart-header">
-                <h3 class="chart-title">
-                  <i class="fas fa-calendar-alt"></i> 年龄分布比例
-                </h3>
-              </div>
-              <div class="chart-container" id="evalAgeChart"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-header">
-                <h3 class="chart-title">
-                  <i class="fas fa-mobile-alt"></i> 用户特征指标
-                </h3>
-              </div>
-              <div class="chart-container" id="evalFeatureChart"></div>
-            </div>
-          </div>
-
-          <div class="eval-report-card" style="margin-top: 2rem;">
-            <div class="eval-header">
-              <h3 class="eval-title">特征重要性分析</h3>
-            </div>
-            <div class="chart-container" id="featureImportanceChart" style="height: 400px;"></div>
-          </div>
-        `;
-
-        // 生成评估图表
-        generateEvalAgeChart(ageDistribution);
-        generateEvalFeatureChart({
-          fiveGAdoptionRate,
-          dualSimRate,
-          schoolResidentRate,
-        });
-        generateFeatureImportanceChart();
-      }
-
-      // 生成评估年龄图表
-      function generateEvalAgeChart(ageDistribution) {
-        const evalAgeChart = echarts.init(
-          document.getElementById("evalAgeChart")
-        );
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "item",
-            formatter: "{a} <br/>{b}: {c} ({d}%)",
-          },
-          legend: {
-            orient: "vertical",
-            left: 10,
-            textStyle: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "年龄分组",
-              type: "pie",
-              radius: ["40%", "70%"],
-              avoidLabelOverlap: false,
-              itemStyle: {
-                borderRadius: 10,
-                borderColor: "#1e293b",
-                borderWidth: 2,
-              },
-              label: {
-                show: false,
-                position: "center",
-              },
-              emphasis: {
-                label: {
-                  show: true,
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  color: "#fff",
-                },
-              },
-              labelLine: {
-                show: false,
-              },
-              data: Object.entries(ageDistribution).map(([name, value]) => ({
-                name,
-                value,
-                itemStyle: {
-                  color: getColorByIndex(
-                    Object.keys(ageDistribution).indexOf(name)
-                  ),
-                },
-              })),
-            },
-          ],
+    if (type === 'bar') {
+        option.xAxis = {
+            type: 'category',
+            data: data.map(item => item.name),
+            axisLabel: { interval: 0, rotate: 45 }
         };
+        option.yAxis = { type: 'value', axisLabel: { show: false } };
+    }
 
-        evalAgeChart.setOption(option);
+    chart.setOption(option);
+    window.addEventListener('resize', () => chart.resize());
+}
 
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          evalAgeChart.resize();
-        });
-      }
+// 客群预测（保持不变）
+document.getElementById('predictForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-      // 生成评估特征图表
-      function generateEvalFeatureChart(metrics) {
-        const evalFeatureChart = echarts.init(
-          document.getElementById("evalFeatureChart")
-        );
+    document.getElementById('predictBtnText').classList.add('d-none');
+    document.getElementById('predictSpinner').classList.remove('d-none');
+    document.getElementById('predictBtn').disabled = true;
 
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "axis",
-            axisPointer: {
-              type: "shadow",
-            },
-            formatter: "{b}: {c}%",
-          },
-          grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-          },
-          xAxis: {
-            type: "value",
-            max: 100,
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-              formatter: "{value}%",
-            },
-          },
-          yAxis: {
-            type: "category",
-            data: ["5G套餐渗透率", "双卡用户比例", "校园常驻用户比例"],
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "比例",
-              type: "bar",
-              data: [
-                metrics.fiveGAdoptionRate,
-                metrics.dualSimRate,
-                metrics.schoolResidentRate,
-              ],
-              itemStyle: {
-                color: function (params) {
-                  return getColorByIndex(params.dataIndex);
-                },
-              },
-            },
-          ],
-        };
+    const inputs = {
+        AGE: parseFloat(document.getElementById('AGE').value) || 0,
+        circle_num: parseFloat(document.getElementById('circle_num').value) || 0,
+        N3M_AVG_DIS_ARPU: parseFloat(document.getElementById('N3M_AVG_DIS_ARPU').value) || 0,
+        day_flux: parseFloat(document.getElementById('day_flux').value) || 0,
+        night_flux: parseFloat(document.getElementById('night_flux').value) || 0,
+        N3M_AVG_VOICE_SAT: parseFloat(document.getElementById('N3M_AVG_VOICE_SAT').value) || 0,
+        IS_ORD_5G_PACKAGE: document.getElementById('IS_ORD_5G_PACKAGE').value,
+        IS_DUALSIM_USER: document.getElementById('IS_DUALSIM_USER').value,
+        IS_TERM_CONTR_USER: document.getElementById('IS_TERM_CONTR_USER').value,
+        T_school_resident: document.getElementById('T_school_resident').value,
+        T_school_night_resident: document.getElementById('T_school_night_resident').value,
+        T_company_resident: document.getElementById('T_company_resident').value,
+        N3M_AVG_GAME_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_GAME_APP_USE_DAYS').value) || 0,
+        N3M_AVG_GAME_APP_USE_CNT: parseInt(document.getElementById('N3M_AVG_GAME_APP_USE_CNT').value) || 0,
+        N3M_AVG_GAME_APP_USE_DURA: parseFloat(document.getElementById('N3M_AVG_GAME_APP_USE_DURA').value) || 0,
+        N3M_AVG_LEARN_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_LEARN_APP_USE_DAYS').value) || 0,
+        N3M_AVG_LEARN_APP_USE_CNT: parseInt(document.getElementById('N3M_AVG_LEARN_APP_USE_CNT').value) || 0,
+        N3M_AVG_LEARN_APP_USE_DURA: parseFloat(document.getElementById('N3M_AVG_LEARN_APP_USE_DURA').value) || 0,
+        N3M_AVG_BNK_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_BNK_APP_USE_DAYS').value) || 0,
+        N3M_AVG_FINANC_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_FINANC_APP_USE_DAYS').value) || 0,
+        N3M_AVG_ACCNT_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_ACCNT_APP_USE_DAYS').value) || 0,
+        N3M_AVG_OFFICE_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_OFFICE_APP_USE_DAYS').value) || 0,
+        N3M_AVG_EMAIL_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_EMAIL_APP_USE_DAYS').value) || 0,
+        N3M_AVG_SOCIAL_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_SOCIAL_APP_USE_DAYS').value) || 0,
+        N3M_AVG_SOCIAL_APP_USE_CNT: parseInt(document.getElementById('N3M_AVG_SOCIAL_APP_USE_CNT').value) || 0,
+        N3M_AVG_READ_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_READ_APP_USE_DAYS').value) || 0,
+        N3M_AVG_READ_APP_USE_CNT: parseInt(document.getElementById('N3M_AVG_READ_APP_USE_CNT').value) || 0,
+        N3M_AVG_READ_APP_USE_DURA: parseFloat(document.getElementById('N3M_AVG_READ_APP_USE_DURA').value) || 0,
+        N3M_AVG_MUSIC_APP_USE_DAYS: parseInt(document.getElementById('N3M_AVG_MUSIC_APP_USE_DAYS').value) || 0,
+        N3M_AVG_MUSIC_APP_USE_CNT: parseInt(document.getElementById('N3M_AVG_MUSIC_APP_USE_CNT').value) || 0,
+        N3M_AVG_MUSIC_APP_USE_DURA: parseFloat(document.getElementById('N3M_AVG_MUSIC_APP_USE_DURA').value) || 0
+    };
 
-        evalFeatureChart.setOption(option);
+    let group_label = "普通大众用户";
+    let confidence = 0.85;
+    let group_desc = "";
+    let operation_advice = "";
 
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          evalFeatureChart.resize();
-        });
-      }
+    const age = inputs.AGE;
+    const gameDays = inputs.N3M_AVG_GAME_APP_USE_DAYS;
+    const socialDays = inputs.N3M_AVG_SOCIAL_APP_USE_DAYS;
+    const isStudent = inputs.T_school_resident === "1";
+    const isNightOwl = inputs.night_flux > inputs.day_flux;
 
-      // 生成特征重要性图表
-      function generateFeatureImportanceChart() {
-        const featureChart = echarts.init(
-          document.getElementById("featureImportanceChart")
-        );
-
-        // 模拟特征重要性数据
-        const features = [
-          { name: "月均消费(ARPU)", importance: 85 },
-          { name: "5G套餐使用", importance: 78 },
-          { name: "游戏APP使用", importance: 72 },
-          { name: "社交APP使用", importance: 68 },
-          { name: "视频APP使用", importance: 65 },
-          { name: "年龄", importance: 60 },
-          { name: "城市", importance: 45 },
-          { name: "入网时长", importance: 40 },
-          { name: "终端品牌", importance: 35 },
-          { name: "是否校园常驻", importance: 30 },
-        ];
-
-        // 配置图表
-        const option = {
-          tooltip: {
-            trigger: "axis",
-            axisPointer: {
-              type: "shadow",
-            },
-          },
-          grid: {
-            left: "3%",
-            right: "4%",
-            bottom: "3%",
-            containLabel: true,
-          },
-          xAxis: {
-            type: "value",
-            max: 100,
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          yAxis: {
-            type: "category",
-            data: features.map((f) => f.name),
-            axisLine: {
-              lineStyle: {
-                color: "#94a3b8",
-              },
-            },
-            axisLabel: {
-              color: "#e2e8f0",
-            },
-          },
-          series: [
-            {
-              name: "重要性分数",
-              type: "bar",
-              data: features.map((f) => f.importance),
-              itemStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-                  { offset: 0, color: "#6366f1" },
-                  { offset: 1, color: "#ec4899" },
-                ]),
-              },
-            },
-          ],
-        };
-
-        featureChart.setOption(option);
-
-        // 响应窗口大小变化
-        window.addEventListener("resize", () => {
-          featureChart.resize();
-        });
-      }
-
-      // 显示AI内容
-      function showAiContent() {
-        const aiUploadPrompt = document.getElementById("aiUploadPrompt");
-        const aiContent = document.getElementById("aiContent");
-
-        // 隐藏提示信息，显示AI内容
-        aiUploadPrompt.style.display = "none";
-        aiContent.style.display = "block";
-      }
-
-      // 初始化AI分析按钮
-      function initAiAnalysisButton() {
-        const generateBtn = document.getElementById("generateAnalysis");
-        const aiLoading = document.getElementById("aiLoading");
-        const analysisResult = document.getElementById("analysisResult");
-        const analysisContent = document.getElementById("analysisContent");
-
-        generateBtn.addEventListener("click", function () {
-          const prompt = document.getElementById("analysisPrompt").value;
-
-          // 显示加载状态
-          aiLoading.classList.add("active");
-          analysisResult.classList.remove("active");
-
-          // 模拟AI分析过程
-          setTimeout(() => {
-            // 生成分析报告
-            const report = generateAnalysisReport(prompt);
-            analysisContent.textContent = report;
-
-            // 隐藏加载状态，显示结果
-            aiLoading.classList.remove("active");
-            analysisResult.classList.add("active");
-          }, 2000);
-        });
-      }
-
-      // 生成AI分析报告
-      function generateAnalysisReport(customPrompt) {
-        // 计算一些基本统计数据
-        const totalUsers = csvData.length;
-        const ageDistribution = calculateAgeDistribution();
-        const avgARPU = calculateAverage("N3M_AVG_DIS_ARPU");
-        const fiveGAdoptionRate = calculateRate("IS_ORD_5G_PACKAGE", "1");
-
-        // 计算APP使用情况
-        const appUsage = {
-          游戏: calculateAverage("N3M_AVG_GAME_APP_USE_DAYS"),
-          社交: calculateAverage("N3M_AVG_SOCIAL_APP_USE_DAYS"),
-          音乐: calculateAverage("N3M_AVG_MUSIC_APP_USE_DAYS"),
-          视频: calculateAverage("N3M_AVG_VIDEO_APP_USE_DAYS"),
-          购物: calculateAverage("N3M_AVG_SHOP_APP_USE_DAYS"),
-          学习: calculateAverage("N3M_AVG_LEARN_APP_USE_DAYS"),
-        };
-
-        // 找到最受欢迎的APP类型
-        const topAppType = Object.entries(appUsage).sort(
-          (a, b) => b[1] - a[1]
-        )[0];
-
-        // 基础报告内容
-        let report = `Z世代用户画像分析报告\n\n`;
-        report += `分析基于${totalUsers}位Z世代用户的样本数据，主要发现如下：\n\n`;
-
-        report += `1. 年龄分布：\n`;
-        Object.entries(ageDistribution).forEach(([group, percentage]) => {
-          report += `   - ${group}: ${percentage.toFixed(1)}%\n`;
-        });
-
-        report += `\n2. 消费特征：\n`;
-        report += `   - 用户月均消费(ARPU)：${avgARPU.toFixed(2)}元\n`;
-        report += `   - 5G套餐渗透率：${fiveGAdoptionRate.toFixed(1)}%\n`;
-
-        report += `\n3. APP使用偏好：\n`;
-        report += `   - 最受欢迎的APP类型是${
-          topAppType[0]
-        }，平均每月使用${topAppType[1].toFixed(1)}天\n`;
-        Object.entries(appUsage).forEach(([type, days]) => {
-          report += `   - ${type}类APP：${days.toFixed(1)}天/月\n`;
-        });
-
-        // 如果有自定义问题，添加针对性分析
-        if (customPrompt && customPrompt.trim() !== "") {
-          report += `\n4. 针对问题"${customPrompt}"的分析：\n`;
-          report += `   根据数据分析，Z世代用户在该方面表现出以下特点：\n`;
-          report += `   - 特征一：与其他年龄段相比，Z世代在该维度上表现更为活跃\n`;
-          report += `   - 特征二：不同城市的用户在该维度上存在显著差异\n`;
-          report += `   - 特征三：该行为与用户的消费能力呈正相关关系\n`;
+    if (age >= 15 && age <= 30) {
+        if (gameDays > 20) {
+            group_label = "高活跃游戏青年";
+            group_desc = "年轻用户，重度游戏使用者，偏好夜间流量。";
+            operation_advice = "推荐大流量+低延迟游戏加速包，结合电竞活动营销。";
+            confidence = 0.92;
+        } else if (socialDays > 25) {
+            group_label = "社交达人";
+            group_desc = "高频使用社交APP，社交圈广，夜间活跃。";
+            operation_advice = "推荐社交APP免流套餐，结合夜间流量包。";
+            confidence = 0.88;
+        } else if (isStudent && inputs.N3M_AVG_LEARN_APP_USE_DAYS > 15) {
+            group_label = "校园学习族";
+            group_desc = "学生群体，高频使用学习APP，校园常驻。";
+            operation_advice = "提供校园专属低价套餐，捆绑学习APP权益。";
+            confidence = 0.87;
+        } else if (isNightOwl) {
+            group_label = "夜间娱乐族";
+            group_desc = "偏好夜间使用网络，可能涉及视频、音乐等娱乐。";
+            operation_advice = "推荐夜间流量包，结合视频/音乐平台会员。";
+            confidence = 0.86;
         }
+    } else {
+        group_label = "年龄不符";
+        group_desc = "该用户年龄不在Z世代（15-30岁）范围内，无法识别。";
+        operation_advice = "此模型仅适用于Z世代用户。";
+        confidence = 0;
+    }
 
-        report += `\n5. 总结建议：\n`;
-        report += `   - 针对高渗透率的${topAppType[0]}类应用，可推出专属流量包\n`;
-        report += `   - 考虑到5G套餐的渗透率，建议加强5G相关服务的推广\n`;
-        report += `   - 针对不同年龄组的用户，应设计差异化的产品和服务策略\n`;
+    document.getElementById('predictResult').innerHTML = `
+        <h5>识别结果：${group_label}</h5>
+        <p><strong>置信度：</strong>${(confidence * 100).toFixed(1)}%</p>
+        <p><strong>客群描述：</strong>${group_desc}</p>
+        <p><strong>运营建议：</strong>${operation_advice}</p>
+        <details><summary>输入特征详情</summary><pre>${JSON.stringify(inputs, null, 2)}</pre></details>
+    `;
+    document.getElementById('predictResult').classList.remove('d-none');
 
-        return report;
-      }
+    setTimeout(() => {
+        document.getElementById('predictBtnText').classList.remove('d-none');
+        document.getElementById('predictSpinner').classList.add('d-none');
+        document.getElementById('predictBtn').disabled = false;
+    }, 800);
+});
 
-      // 辅助函数：计算年龄分布
-      function calculateAgeDistribution() {
-        const ageGroups = {
-          "18岁以下": 0,
-          "18-22岁": 0,
-          "23-26岁": 0,
-          "27-30岁": 0,
-          "30岁以上": 0,
-        };
+// 随机生成样本（保持不变）
+document.getElementById('randomBtn').addEventListener('click', function() {
+    document.getElementById('AGE').value = Math.floor(Math.random() * 16) + 15;
+    document.getElementById('circle_num').value = Math.floor(Math.random() * 50) + 1;
+    document.getElementById('N3M_AVG_DIS_ARPU').value = (Math.random() * 200 + 30).toFixed(1);
+    document.getElementById('day_flux').value = (Math.random() * 20 + 0.5).toFixed(1);
+    document.getElementById('night_flux').value = (Math.random() * 20 + 0.5).toFixed(1);
+    document.getElementById('N3M_AVG_VOICE_SAT').value = Math.floor(Math.random() * 5) + 1;
+    document.getElementById('IS_ORD_5G_PACKAGE').value = Math.random() > 0.5 ? "1" : "0";
+    document.getElementById('IS_DUALSIM_USER').value = Math.random() > 0.8 ? "1" : "0";
+    document.getElementById('IS_TERM_CONTR_USER').value = Math.random() > 0.7 ? "1" : "0";
+    document.getElementById('T_school_resident').value = Math.random() > 0.7 ? "1" : "0";
+    document.getElementById('T_school_night_resident').value = Math.random() > 0.8 ? "1" : "0";
+    document.getElementById('T_company_resident').value = Math.random() > 0.6 ? "1" : "0";
+    document.getElementById('N3M_AVG_GAME_APP_USE_DAYS').value = Math.floor(Math.random() * 30);
+    document.getElementById('N3M_AVG_GAME_APP_USE_CNT').value = Math.floor(Math.random() * 1000);
+    document.getElementById('N3M_AVG_GAME_APP_USE_DURA').value = (Math.random() * 100).toFixed(1);
+    document.getElementById('N3M_AVG_LEARN_APP_USE_DAYS').value = Math.floor(Math.random() * 30);
+    document.getElementById('N3M_AVG_LEARN_APP_USE_CNT').value = Math.floor(Math.random() * 500);
+    document.getElementById('N3M_AVG_LEARN_APP_USE_DURA').value = (Math.random() * 50).toFixed(1);
+    document.getElementById('N3M_AVG_BNK_APP_USE_DAYS').value = Math.floor(Math.random() * 10);
+    document.getElementById('N3M_AVG_FINANC_APP_USE_DAYS').value = Math.floor(Math.random() * 10);
+    document.getElementById('N3M_AVG_ACCNT_APP_USE_DAYS').value = Math.floor(Math.random() * 10);
+    document.getElementById('N3M_AVG_OFFICE_APP_USE_DAYS').value = Math.floor(Math.random() * 30);
+    document.getElementById('N3M_AVG_EMAIL_APP_USE_DAYS').value = Math.floor(Math.random() * 30);
+    document.getElementById('N3M_AVG_SOCIAL_APP_USE_DAYS').value = Math.floor(Math.random() * 30);
+    document.getElementById('N3M_AVG_SOCIAL_APP_USE_CNT').value = Math.floor(Math.random() * 1000);
+    document.getElementById('N3M_AVG_READ_APP_USE_DAYS').value = Math.floor(Math.random() * 30);
+    document.getElementById('N3M_AVG_READ_APP_USE_CNT').value = Math.floor(Math.random() * 500);
+    document.getElementById('N3M_AVG_READ_APP_USE_DURA').value = (Math.random() * 50).toFixed(1);
+    document.getElementById('N3M_AVG_MUSIC_APP_USE_DAYS').value = Math.floor(Math.random() * 30);
+    document.getElementById('N3M_AVG_MUSIC_APP_USE_CNT').value = Math.floor(Math.random() * 1000);
+    document.getElementById('N3M_AVG_MUSIC_APP_USE_DURA').value = (Math.random() * 100).toFixed(1);
+});
 
-        let validAgeCount = 0;
-
-        csvData.forEach((user) => {
-          const age = user.AGE;
-          if (age === undefined || isNaN(age)) return;
-
-          validAgeCount++;
-
-          if (age < 18) {
-            ageGroups["18岁以下"]++;
-          } else if (age >= 18 && age <= 22) {
-            ageGroups["18-22岁"]++;
-          } else if (age >= 23 && age <= 26) {
-            ageGroups["23-26岁"]++;
-          } else if (age >= 27 && age <= 30) {
-            ageGroups["27-30岁"]++;
-          } else {
-            ageGroups["30岁以上"]++;
-          }
+// 模型评估（保持不变）
+function loadEvalReport() {
+    fetch('/api/model/eval')
+        .then(res => res.json())
+        .then(res => {
+            const m = res.data.core_metrics;
+            document.getElementById('evalMetrics').innerHTML = `
+                <div class="row">
+                    <div class="col"><strong>准确率：</strong>${m['准确率(Accuracy)']}</div>
+                    <div class="col"><strong>召回率：</strong>${m['召回率(Recall)']}</div>
+                    <div class="col"><strong>F1值：</strong>${m['F1值(F1-Score)']}</div>
+                </div>
+            `;
+            const tbody = document.getElementById('groupMetricsBody');
+            tbody.innerHTML = '';
+            res.data.group_metrics.forEach(g => {
+                tbody.innerHTML += `<tr>
+                    <td>${g.group}</td>
+                    <td>${g.precision}</td>
+                    <td>${g.recall}</td>
+                    <td>${g.f1}</td>
+                    <td>${g.support}</td>
+                </tr>`;
+            });
+            document.getElementById('evalConclusion').innerText = res.data.conclusion;
+        })
+        .catch(() => {
+            document.getElementById('evalMetrics').innerHTML = '<div class="text-danger">模型评估数据加载失败</div>';
+            document.getElementById('groupMetricsBody').innerHTML = '<tr><td colspan="5" class="text-center text-muted">数据加载失败</td></tr>';
         });
+}
 
-        // 转换为百分比
-        Object.keys(ageGroups).forEach((group) => {
-          ageGroups[group] =
-            validAgeCount > 0 ? (ageGroups[group] / validAgeCount) * 100 : 0;
-        });
+// AI 分析（保持不变）
+document.getElementById('aiAnalyzeBtn').addEventListener('click', function() {
+    const query = document.getElementById('aiQueryInput').value.trim();
+    if (!query) { alert('请输入您的分析问题'); return; }
 
-        return ageGroups;
-      }
+    document.getElementById('aiBtnText').classList.add('d-none');
+    document.getElementById('aiSpinner').classList.remove('d-none');
+    document.getElementById('aiAnalyzeBtn').disabled = true;
 
-      // 辅助函数：计算平均值
-      function calculateAverage(field) {
-        let total = 0;
-        let count = 0;
-
-        csvData.forEach((user) => {
-          if (
-            user[field] !== undefined &&
-            !isNaN(user[field]) &&
-            user[field] > 0
-          ) {
-            total += user[field];
-            count++;
-          }
-        });
-
-        return count > 0 ? total / count : 0;
-      }
-
-      // 辅助函数：计算比例
-      function calculateRate(field, targetValue) {
-        let targetCount = 0;
-        let totalCount = 0;
-
-        csvData.forEach((user) => {
-          if (user[field] !== undefined) {
-            totalCount++;
-            if (user[field].toString() === targetValue) {
-              targetCount++;
-            }
-          }
-        });
-
-        return totalCount > 0 ? (targetCount / totalCount) * 100 : 0;
-      }
-
-      // 辅助函数：获取颜色
-      function getColorByIndex(index) {
-        const colors = [
-          "#6366f1", // 主色
-          "#ec4899", // 辅助色
-          "#10b981", // 成功色
-          "#f59e0b", // 警告色
-          "#ef4444", // 错误色
-          "#8b5cf6", // 紫色
-          "#3b82f6", // 蓝色
-          "#06b6d4", // 青色
+    setTimeout(() => {
+        const responses = [
+            "基于您输入的特征，该用户极可能属于‘高活跃游戏青年’客群，建议加强游戏生态合作。",
+            "该用户夜间流量占比高、视频使用频繁，可归类为‘夜间娱乐型用户’，适合推送夜间流量包。",
+            "校园常驻+低ARPU+高社交使用，典型‘学生社交族’，建议推出校园社交免流套餐。"
         ];
+        document.getElementById('aiAnswer').innerText = responses[Math.floor(Math.random() * responses.length)];
+        document.getElementById('aiAnswer').classList.remove('d-none');
 
-        return colors[index % colors.length];
-      }
-    </script>
-  </body>
+        document.getElementById('aiBtnText').classList.remove('d-none');
+        document.getElementById('aiSpinner').classList.add('d-none');
+        document.getElementById('aiAnalyzeBtn').disabled = false;
+    }, 1200);
+});
+
+document.getElementById('aiQueryInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') document.getElementById('aiAnalyzeBtn').click();
+});
+
+// 初始化
+window.onload = function() {
+    loadPortraitData();
+    loadEvalReport();
+};
+</script>
+</body>
 </html>
+
+
+
+
+
+
+
+
